@@ -19,10 +19,12 @@ function useRandomQuote() {
   useEffect(() => {
     async function fetchQuote() {
       try {
-        const res = await fetch("https://api.quotable.io/random");
-        const json = await res.json();
-        setQuote({ content: json.content, author: json.author });
-      } catch (e) {
+        const res = await fetch("https://zenquotes.io/api/random");
+        const data = await res.json();
+        const q = Array.isArray(data) ? data[0] : data;
+
+        setQuote({ content: q.q, author: q.a });
+      } catch {
         setQuote({
           content: "The body achieves what the mind believes.",
           author: "Anonymous",
@@ -44,55 +46,61 @@ export default function HomeScreen() {
   return (
     <ImageBackground
       source={{
-        uri: "https://images.unsplash.com/photo-1558611848-73f7eb4001d0?auto=format&fit=crop&w=1200&q=80",
+        uri: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=1200&q=80",
       }}
       style={styles.bg}
-      imageStyle={{ opacity: 0.6 }}
+      imageStyle={{ opacity: 0.55 }}
     >
       <StatusBar
-        barStyle="light-content"
         translucent
         backgroundColor="transparent"
+        barStyle="light-content"
       />
       <Header
         title="FitFlow"
         onPressMenu={() => {}}
         onPressFav={() => nav.navigate("Favorites")}
       />
-      <SafeAreaView style={styles.overlay}>
-        <View style={styles.hero}>
-          <Text style={styles.hi}>Crush Your Workout</Text>
-          <Text style={styles.sub}>
-            Smart workouts • Beautiful UI • Track effortlessly
-          </Text>
 
-          <View style={styles.actionsRow}>
-            <TouchableOpacity
-              style={styles.primaryBtn}
-              onPress={() => nav.navigate("List")}
-            >
-              <Text style={styles.primaryText}>Explore Exercises</Text>
-            </TouchableOpacity>
+      <SafeAreaView style={{ flex: 1 }}>
+        <View style={styles.gradientOverlay} />
 
-            <TouchableOpacity
-              style={styles.ghostBtn}
-              onPress={() => nav.navigate("Favorites")}
-            >
-              <Text style={styles.ghostText}>Saved</Text>
-            </TouchableOpacity>
+        <View style={styles.container}>
+          <View style={styles.hero}>
+            <Text style={styles.title}>Crush Your Workout</Text>
+            <Text style={styles.subtitle}>
+              Smart workouts • Beautiful UI • Track effortlessly
+            </Text>
+
+            <View style={styles.actionRow}>
+              <TouchableOpacity
+                style={styles.primaryBtn}
+                onPress={() => nav.navigate("List")}
+              >
+                <Text style={styles.primaryText}>Explore Exercises</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.secondaryBtn}
+                onPress={() => nav.navigate("Favorites")}
+              >
+                <Text style={styles.secondaryText}>Saved</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
 
-        <View style={styles.bottomCard}>
-          <Text style={styles.cardTitle}>Daily Motivation ⚡</Text>
-          {loading ? (
-            <ActivityIndicator color="#0f172a" style={{ marginTop: 8 }} />
-          ) : (
-            <>
-              <Text style={styles.cardQuoteTxt}>"{quote.content}"</Text>
-              <Text style={styles.cardQuoteAuthor}>- {quote.author}</Text>
-            </>
-          )}
+          {/* Quote Card */}
+          <View style={styles.quoteCard}>
+            <Text style={styles.quoteHeader}>Daily Motivation ⚡</Text>
+            {loading ? (
+              <ActivityIndicator style={{ marginTop: 8 }} />
+            ) : (
+              <>
+                <Text style={styles.quoteText}>"{quote.content}"</Text>
+                <Text style={styles.quoteAuthor}>- {quote.author}</Text>
+              </>
+            )}
+          </View>
         </View>
       </SafeAreaView>
     </ImageBackground>
@@ -100,56 +108,105 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  bg: { flex: 1, backgroundColor: "#0f172a" },
-  overlay: {
+  bg: {
     flex: 1,
-    paddingHorizontal: 12,
+    backgroundColor: "#0f172a",
+  },
+
+  gradientOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.25)",
+  },
+
+  container: {
+    flex: 1,
     justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingBottom: 24,
   },
-  hero: { marginTop: 10, paddingBottom: 20 },
-  hi: { color: "#fff", fontSize: 36, fontWeight: "900" },
-  sub: { color: "#e6f0ff", marginTop: 8, fontSize: 16, fontWeight: "500" },
-  actionsRow: { flexDirection: "row", marginTop: 24, alignItems: "center" },
+
+  hero: {
+    marginTop: 20,
+  },
+
+  title: {
+    color: "#fff",
+    fontSize: 38,
+    fontWeight: "900",
+  },
+
+  subtitle: {
+    color: "#e6f0ff",
+    marginTop: 8,
+    fontSize: 16,
+    fontWeight: "500",
+    lineHeight: 22,
+  },
+
+  actionRow: {
+    flexDirection: "row",
+    marginTop: 28,
+    alignItems: "center",
+  },
+
   primaryBtn: {
-    backgroundColor: "#ff5c7c",
+    backgroundColor: "#ff577b",
     paddingVertical: 14,
-    paddingHorizontal: 20,
+    paddingHorizontal: 22,
     borderRadius: 14,
-    marginRight: 16,
-    elevation: 8,
+    marginRight: 14,
   },
-  primaryText: { color: "#fff", fontWeight: "700", fontSize: 16 },
-  ghostBtn: {
+
+  primaryText: {
+    color: "#fff",
+    fontWeight: "700",
+    fontSize: 16,
+  },
+
+  secondaryBtn: {
     borderWidth: 2,
     borderColor: "#fff",
     paddingVertical: 12,
-    paddingHorizontal: 18,
+    paddingHorizontal: 20,
     borderRadius: 14,
   },
-  ghostText: { color: "#fff", fontWeight: "600", fontSize: 16 },
-  bottomCard: {
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 30,
-    shadowColor: "#0f172a",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    elevation: 10,
-  },
-  cardTitle: { fontWeight: "900", fontSize: 18, color: "#0f172a" },
-  cardQuoteTxt: {
-    marginTop: 10,
-    fontSize: 14.5,
-    color: "#444",
-    fontStyle: "italic",
-  },
-  cardQuoteAuthor: {
-    marginTop: 4,
-    fontSize: 12,
-    color: "#666",
-    textAlign: "right",
+
+  secondaryText: {
+    color: "#fff",
     fontWeight: "600",
+    fontSize: 16,
+  },
+
+  quoteCard: {
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 16,
+    shadowColor: "#000",
+    shadowOpacity: 0.15,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 9,
+    elevation: 6,
+  },
+
+  quoteHeader: {
+    fontWeight: "800",
+    fontSize: 18,
+    color: "#0f172a",
+  },
+
+  quoteText: {
+    fontSize: 14.5,
+    color: "#333",
+    fontStyle: "italic",
+    marginTop: 10,
+    lineHeight: 20,
+  },
+
+  quoteAuthor: {
+    marginTop: 6,
+    textAlign: "right",
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#555",
   },
 });

@@ -10,6 +10,7 @@ import {
 import Header from "../components/Header";
 import ExerciseCard from "../components/ExerciseCard";
 import { useNavigation } from "@react-navigation/native";
+import { EXERCISE_DATA } from "../data/Excercises";
 
 export default function ExerciseListScreen() {
   const nav = useNavigation();
@@ -18,31 +19,10 @@ export default function ExerciseListScreen() {
   const [loading, setLoading] = useState(true);
 
   async function fetchExercises() {
-    try {
-      const res = await fetch(
-        "https://wger.de/api/v2/exerciseinfo/?language=2&limit=50"
-      );
-      const json = await res.json();
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
-      const formatted = json.results.map((ex) => ({
-        id: String(ex.id),
-        name: ex.name || "Unnamed Exercise",
-        bodyPart: ex.category?.name || "Unknown",
-        equipment: ex.equipment?.[0]?.name || "Body weight",
-        image:
-          ex.images?.[0]?.image ||
-          "https://images.unsplash.com/photo-1517964603305-11c2f62f430c?auto=format&fit=crop&w=800&q=80",
-        description:
-          ex.description?.replace(/<[^>]+>/g, "") || "No description provided.",
-      }));
-
-      setData(formatted);
-    } catch (e) {
-      console.error("Failed to fetch exercises:", e);
-      setData([]);
-    } finally {
-      setLoading(false);
-    }
+    setData(EXERCISE_DATA);
+    setLoading(false);
   }
 
   useEffect(() => {
