@@ -1,16 +1,10 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  TextInput,
-  FlatList,
-  StyleSheet,
-  ActivityIndicator,
-  Text,
-} from "react-native";
+import { View, TextInput, FlatList, StyleSheet, Text } from "react-native";
 import Header from "../components/Header";
 import ExerciseCard from "../components/ExerciseCard";
 import { useNavigation } from "@react-navigation/native";
 import { EXERCISE_DATA } from "../data/Excercises";
+import BenchPressLoader from "../components/BenchPressLoader";
 
 export default function ExerciseListScreen() {
   const nav = useNavigation();
@@ -19,7 +13,7 @@ export default function ExerciseListScreen() {
   const [loading, setLoading] = useState(true);
 
   async function fetchExercises() {
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 2500));
 
     setData(EXERCISE_DATA);
     setLoading(false);
@@ -56,11 +50,8 @@ export default function ExerciseListScreen() {
       </View>
 
       {loading ? (
-        <ActivityIndicator
-          size="large"
-          color="#ff5c7c"
-          style={{ marginTop: 30 }}
-        />
+        // 🏋️‍♂️ Replaced ActivityIndicator with the custom BenchPressLoader
+        <BenchPressLoader />
       ) : filtered.length === 0 ? (
         <View style={styles.emptyWrap}>
           <Text style={styles.emptyText}>

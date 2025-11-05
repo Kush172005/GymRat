@@ -1,12 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   View,
   Text,
   StyleSheet,
   StatusBar,
-  ImageBackground,
   TouchableOpacity,
   ActivityIndicator,
+  Animated,
+  Easing,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -22,7 +23,6 @@ function useRandomQuote() {
         const res = await fetch("https://zenquotes.io/api/random");
         const data = await res.json();
         const q = Array.isArray(data) ? data[0] : data;
-
         setQuote({ content: q.q, author: q.a });
       } catch {
         setQuote({
@@ -43,14 +43,50 @@ export default function HomeScreen() {
   const nav = useNavigation();
   const { quote, loading } = useRandomQuote();
 
+  const images = [
+    "https://i.pinimg.com/736x/92/56/28/925628108f40efc8b37b971ebdb01ff6.jpg",
+    "https://i.pinimg.com/1200x/04/2f/24/042f24d95e88ce396fbd22861da9b2f2.jpg",
+    "https://i.pinimg.com/1200x/16/15/8d/16158d888b9171fbbcbd0d212549fd14.jpg",
+    "https://i.pinimg.com/1200x/5b/90/01/5b90017e5d51dc3c278e08135dd7ecc5.jpg",
+    "https://i.pinimg.com/736x/58/d8/86/58d8868d14e98c5dc3d86992f15b12fa.jpg",
+    "https://i.pinimg.com/1200x/43/d0/79/43d0799004cdf5934a3c9daef739aad4.jpg",
+  ];
+
+  const [index, setIndex] = useState(0);
+  const fadeAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 1000,
+        easing: Easing.inOut(Easing.ease),
+        useNativeDriver: true,
+      }).start(() => {
+        setIndex((prev) => (prev + 1) % images.length);
+
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 1000,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }).start();
+      });
+    }, 6000);
+
+    return () => clearInterval(interval);
+  }, [fadeAnim]);
+
   return (
-    <ImageBackground
-      source={{
-        uri: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=1200&q=80",
-      }}
-      style={styles.bg}
-      imageStyle={{ opacity: 0.55 }}
-    >
+    <View style={styles.bgContainer}>
+      <Animated.Image
+        source={{ uri: images[index] }}
+        style={[styles.bgImage, { opacity: fadeAnim }]}
+        resizeMode="cover"
+      />
+
+      <View style={styles.overlay} />
+
       <StatusBar
         translucent
         backgroundColor="transparent"
@@ -63,8 +99,6 @@ export default function HomeScreen() {
       />
 
       <SafeAreaView style={{ flex: 1 }}>
-        <View style={styles.gradientOverlay} />
-
         <View style={styles.container}>
           <View style={styles.hero}>
             <Text style={styles.title}>Crush Your Workout</Text>
@@ -89,52 +123,51 @@ export default function HomeScreen() {
             </View>
           </View>
 
-          {/* Quote Card */}
           <View style={styles.quoteCard}>
             <Text style={styles.quoteHeader}>Daily Motivation ⚡</Text>
             {loading ? (
-              <ActivityIndicator style={{ marginTop: 8 }} />
+              <ActivityIndicator style={{ marginTop: 8 }} color="#ff577b" />
             ) : (
               <>
                 <Text style={styles.quoteText}>"{quote.content}"</Text>
-                <Text style={styles.quoteAuthor}>- {quote.author}</Text>
+                <Text style={styles.quoteAuthor}>— {quote.author}</Text>
               </>
             )}
           </View>
         </View>
       </SafeAreaView>
-    </ImageBackground>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  bg: {
+  bgContainer: {
     flex: 1,
     backgroundColor: "#0f172a",
   },
-
-  gradientOverlay: {
+  bgImage: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.25)",
+    width: "100%",
+    height: "100%",
   },
-
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.35)",
+  },
   container: {
     flex: 1,
     justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingBottom: 24,
   },
-
   hero: {
     marginTop: 20,
   },
-
   title: {
     color: "#fff",
-    fontSize: 38,
+    fontSize: 36,
     fontWeight: "900",
   },
-
   subtitle: {
     color: "#e6f0ff",
     marginTop: 8,
@@ -142,13 +175,11 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     lineHeight: 22,
   },
-
   actionRow: {
     flexDirection: "row",
     marginTop: 28,
     alignItems: "center",
   },
-
   primaryBtn: {
     backgroundColor: "#ff577b",
     paddingVertical: 14,
@@ -156,13 +187,11 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     marginRight: 14,
   },
-
   primaryText: {
     color: "#fff",
     fontWeight: "700",
     fontSize: 16,
   },
-
   secondaryBtn: {
     borderWidth: 2,
     borderColor: "#fff",
@@ -170,43 +199,40 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 14,
   },
-
   secondaryText: {
     color: "#fff",
     fontWeight: "600",
     fontSize: 16,
   },
-
   quoteCard: {
-    backgroundColor: "#fff",
-    padding: 20,
+    backgroundColor: "rgba(255,255,255,0.12)",
+    borderColor: "rgba(255,255,255,0.25)",
+    borderWidth: 1,
+    padding: 18,
     borderRadius: 16,
     shadowColor: "#000",
-    shadowOpacity: 0.15,
-    shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 9,
-    elevation: 6,
+    shadowOpacity: 0.25,
+    shadowOffset: { width: 0, height: 6 },
+    shadowRadius: 10,
+    elevation: 8,
   },
-
   quoteHeader: {
     fontWeight: "800",
-    fontSize: 18,
-    color: "#0f172a",
+    fontSize: 17,
+    color: "#fff",
   },
-
   quoteText: {
-    fontSize: 14.5,
-    color: "#333",
+    fontSize: 15,
+    color: "#f1f5f9",
     fontStyle: "italic",
     marginTop: 10,
-    lineHeight: 20,
+    lineHeight: 22,
   },
-
   quoteAuthor: {
     marginTop: 6,
     textAlign: "right",
     fontSize: 13,
     fontWeight: "600",
-    color: "#555",
+    color: "#e2e8f0",
   },
 });

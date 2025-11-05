@@ -40,7 +40,6 @@ export default function ExerciseDetailScreen() {
     } catch (e) {}
   }
 
-  // Fallback data for safety
   const safeItem = item || {
     name: "Unknown Exercise",
     bodyPart: "Unknown",

@@ -105,7 +105,7 @@ export const EXERCISE_DATA = [
     bodyPart: "Shoulders",
     equipment: "Dumbbells",
     image:
-      "https://images.unsplash.com/photo-1627888258514-63c26786ffb0?fit=crop&w=800&q=80",
+      "https://www.trainheroic.com/wp-content/uploads/2023/01/AdobeStock_63335692-TH-jpg.webp",
     description:
       "Targets the lateral (side) deltoids for shoulder width. With dumbbells in hand, lift your arms out to the sides until they are parallel to the floor.",
   },
@@ -115,7 +115,7 @@ export const EXERCISE_DATA = [
     bodyPart: "Legs",
     equipment: "Dumbbells",
     image:
-      "https://images.unsplash.com/photo-1587973715424-9b5185df2a9c?fit=crop&w=800&q=80",
+      "https://hips.hearstapps.com/hmg-prod/images/muscular-man-training-his-legs-doing-lunges-with-royalty-free-image-1677586874.jpg?crop=0.667xw:1.00xh;0.236xw,0&resize=1200:*",
     description:
       "A unilateral exercise for building leg strength and balance. Step forward, lowering your hips until both knees are bent at a 90-degree angle.",
   },
@@ -125,7 +125,7 @@ export const EXERCISE_DATA = [
     bodyPart: "Chest",
     equipment: "None",
     image:
-      "https://images.unsplash.com/photo-1549574070-4284ff357d36?fit=crop&w=800&q=80",
+      "https://www.performancehealth.com/media/amasty/blog/cache/5/-/1033/581/5-techniques-for-achieving-the-perfect-push-up-form.jpeg",
     description:
       "A foundational bodyweight exercise for the chest, shoulders, and triceps. Keep your body in a straight line from head to heels and push up and down.",
   },
@@ -134,8 +134,7 @@ export const EXERCISE_DATA = [
     name: "Row Machine",
     bodyPart: "Back",
     equipment: "Machine",
-    image:
-      "https://images.unsplash.com/photo-1534438327276-14e5300d3a48?fit=crop&w=800&q=80",
+    image: "https://www.puregym.com/media/0epkvais/seated-row.jpg?quality=80",
     description:
       "A full-body cardio and strength workout. Push with your legs, lean back slightly, and pull the handle to your abdomen in a smooth motion.",
   },
@@ -145,7 +144,7 @@ export const EXERCISE_DATA = [
     bodyPart: "Chest",
     equipment: "Cables",
     image:
-      "https://images.unsplash.com/photo-1579756184985-7c15e8b61c16?fit=crop&w=800&q=80",
+      "https://www.barbellmedicine.com/wp-content/uploads/2023/12/Cable-Chest-Press.jpg",
     description:
       "An isolation exercise that targets the inner chest. Stand between the cable stacks, grab the handles, and bring your hands together in front of your chest.",
   },
@@ -165,7 +164,7 @@ export const EXERCISE_DATA = [
     bodyPart: "Legs",
     equipment: "Machine",
     image:
-      "https://images.unsplash.com/photo-1627258380806-a8439268f742?fit=crop&w=800&q=80",
+      "https://cdn.muscleandstrength.com/sites/default/files/seated-calf-raise-1.jpg",
     description:
       "Targets the calf muscles. Stand on a block with the balls of your feet and raise your heels as high as possible.",
   },
@@ -184,7 +183,7 @@ export const EXERCISE_DATA = [
     bodyPart: "Chest",
     equipment: "Dumbbells",
     image:
-      "https://images.unsplash.com/photo-1574680064506-69a48f21dd44?fit=crop&w=800&q=80",
+      "https://media.post.rvohealth.io/wp-content/uploads/2020/08/11571-Incline_vs_Flat_Bench_Wha_Best_for_Your_Chest-_732x549-thumbnail-732x549.jpg",
     description:
       "Focuses on stretching and isolating the chest. Lie on a flat bench and lower dumbbells out to the sides with a slight bend in your elbows.",
   },
@@ -194,7 +193,7 @@ export const EXERCISE_DATA = [
     bodyPart: "Shoulders",
     equipment: "Dumbbells",
     image:
-      "https://images.unsplash.com/photo-1584824373400-b633634c0e64?fit=crop&w=800&q=80",
+      "https://i0.wp.com/www.muscleandfitness.com/wp-content/uploads/2013/07/dumbbell-shrug.jpg?quality=86&strip=all",
     description:
       "Primarily targets the trapezius muscles. Hold heavy dumbbells and shrug your shoulders straight up toward your ears.",
   },

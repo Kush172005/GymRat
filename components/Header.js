@@ -32,9 +32,9 @@ export default function Header({
       {showFav ? (
         <TouchableOpacity onPress={onPressFav} style={styles.iconWrap}>
           <Ionicons
-            name="heart"
+            name="star"
             size={24}
-            color={transparent ? "#fff" : "#ff5c7c"}
+            color={transparent ? "#fff" : "#ffc107"}
           />
         </TouchableOpacity>
       ) : (

@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
-} from "react-native";
+import { View, Text, StyleSheet, FlatList } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import ExerciseCard from "../components/ExerciseCard";
 import Header from "../components/Header";
