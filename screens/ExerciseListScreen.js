@@ -50,7 +50,6 @@ export default function ExerciseListScreen() {
       </View>
 
       {loading ? (
-        // 🏋️‍♂️ Replaced ActivityIndicator with the custom BenchPressLoader
         <BenchPressLoader />
       ) : filtered.length === 0 ? (
         <View style={styles.emptyWrap}>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   Image,
   ScrollView,
   TouchableOpacity,
+  Animated,
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 
@@ -13,11 +14,54 @@ import Header from "../components/Header";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+const renderBoldedText = (text) => {
+  const steps = text.split("\n");
+
+  return steps
+    .map((step, index) => {
+      const trimmedStep = step.trim();
+      if (!trimmedStep) return null;
+
+      const colonIndex = trimmedStep.indexOf(":");
+
+      if (colonIndex > 0) {
+        const title = trimmedStep.substring(0, colonIndex + 1);
+        const instruction = trimmedStep.substring(colonIndex + 1);
+        return (
+          <Text key={index} style={styles.text}>
+            <Text style={styles.boldText}>{title}</Text>
+            {instruction}
+          </Text>
+        );
+      } else {
+        return (
+          <Text key={index} style={styles.text}>
+            {trimmedStep}
+          </Text>
+        );
+      }
+    })
+    .filter(Boolean)
+    .reduce(
+      (prev, curr, i) => [
+        prev,
+        i > 0 && (
+          <Text key={`sep-${i}`} style={styles.spacerText}>
+            {" "}
+          </Text>
+        ),
+        curr,
+      ],
+      null
+    );
+};
+
 export default function ExerciseDetailScreen() {
   const route = useRoute();
   const nav = useNavigation();
   const { item } = route.params || {};
   const [fav, setFav] = useState(false);
+  const pulseAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     (async () => {
@@ -28,6 +72,23 @@ export default function ExerciseDetailScreen() {
     })();
   }, []);
 
+  const runPulseAnimation = () => {
+    pulseAnim.setValue(0.7);
+    Animated.spring(pulseAnim, {
+      toValue: 1.2,
+      speed: 10,
+      bounciness: 20,
+      useNativeDriver: true,
+    }).start(() => {
+      Animated.spring(pulseAnim, {
+        toValue: 1,
+        speed: 15,
+        bounciness: 8,
+        useNativeDriver: true,
+      }).start();
+    });
+  };
+
   async function toggleFav() {
     try {
       if (fav) {
@@ -36,17 +97,25 @@ export default function ExerciseDetailScreen() {
       } else {
         await AsyncStorage.setItem("@fav_" + item.id, JSON.stringify(item));
         setFav(true);
+        runPulseAnimation();
       }
     } catch (e) {}
   }
 
-  const safeItem = item || {
-    name: "Unknown Exercise",
-    bodyPart: "Unknown",
-    equipment: "N/A",
+  const safeItem = {
+    ...item,
+    name: item?.name || "Unknown Exercise",
+    bodyPart: item?.bodyPart || "Unknown",
+    equipment: item?.equipment || "N/A",
     image:
+      item?.image ||
       "https://images.unsplash.com/photo-1517964603305-11c2f62f430c?auto=format&fit=crop&w=800&q=80",
-    description: "Exercise details could not be loaded.",
+    description:
+      item?.description ||
+      "No simple instructions available. Consult a trainer.",
+    beginnerTips:
+      item?.beginnerTips ||
+      "• Prioritize form over weight.\n• Always warm up before starting.\n• Listen to your body and stop if you feel sharp pain.",
   };
 
   return (
@@ -69,25 +138,27 @@ export default function ExerciseDetailScreen() {
           </View>
 
           <TouchableOpacity onPress={toggleFav} style={styles.favBtn}>
-            <Ionicons
-              name={fav ? "heart" : "heart-outline"}
-              size={30}
-              color={fav ? "#ff4d6d" : "#999"}
-            />
+            <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
+              <Ionicons
+                name={fav ? "heart" : "heart-outline"}
+                size={30}
+                color={fav ? "#ff4d6d" : "#999"}
+              />
+            </Animated.View>
           </TouchableOpacity>
         </View>
 
         <View style={styles.section}>
           <Text style={styles.header}>How to Do</Text>
-          <Text style={styles.text}>{safeItem.description}</Text>
+          <View style={{ marginTop: 10 }}>
+            {renderBoldedText(safeItem.description)}
+          </View>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.header}>Tips</Text>
-          <Text style={styles.text}>
-            • Keep your posture aligned {"\n"}• Breathe properly {"\n"}•
-            Prioritize form over weight {"\n"}• Controlled reps fast reps
-          </Text>
+          <Text style={styles.header}>Beginner Tips</Text>
+          <View style={{ height: 10 }} />
+          <Text style={styles.text}>{safeItem.beginnerTips}</Text>
         </View>
 
         <TouchableOpacity
@@ -146,10 +217,17 @@ const styles = StyleSheet.create({
     color: "#0f172a",
   },
   text: {
-    marginTop: 10,
     fontSize: 16,
     color: "#444",
     lineHeight: 24,
+    marginTop: 0,
+  },
+  boldText: {
+    fontWeight: "800",
+    color: "#111",
+  },
+  spacerText: {
+    fontSize: 5,
   },
   button: {
     marginTop: 30,
