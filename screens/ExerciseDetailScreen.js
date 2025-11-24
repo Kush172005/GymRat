@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import {
   View,
   Text,
@@ -7,12 +7,22 @@ import {
   ScrollView,
   TouchableOpacity,
   Animated,
+  Modal,
+  Dimensions,
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
-
-import Header from "../components/Header";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import YoutubePlayer from "react-native-youtube-iframe";
+
+import Header from "../components/Header";
+
+const getYoutubeId = (url) => {
+  if (!url) return null;
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+  const match = url.match(regExp);
+  return match && match[2].length === 11 ? match[2] : null;
+};
 
 const renderBoldedText = (text) => {
   const steps = text.split("\n");
@@ -60,8 +70,15 @@ export default function ExerciseDetailScreen() {
   const route = useRoute();
   const nav = useNavigation();
   const { item } = route.params || {};
+
   const [fav, setFav] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [playing, setPlaying] = useState(false);
+
   const pulseAnim = useRef(new Animated.Value(1)).current;
+  const { width } = Dimensions.get("window");
+
+  const videoId = getYoutubeId(item?.videoUrl);
 
   useEffect(() => {
     (async () => {
@@ -70,6 +87,12 @@ export default function ExerciseDetailScreen() {
         setFav(!!v);
       } catch (e) {}
     })();
+  }, []);
+
+  const onStateChange = useCallback((state) => {
+    if (state === "ended") {
+      setPlaying(false);
+    }
   }, []);
 
   const runPulseAnimation = () => {
@@ -127,7 +150,27 @@ export default function ExerciseDetailScreen() {
       />
 
       <ScrollView contentContainerStyle={{ padding: 18 }}>
-        <Image source={{ uri: safeItem.image }} style={styles.image} />
+        <TouchableOpacity
+          activeOpacity={0.9}
+          onPress={() => videoId && setModalVisible(true)}
+          style={styles.imageContainer}
+        >
+          <Image source={{ uri: safeItem.image }} style={styles.image} />
+
+          {videoId && (
+            <View style={styles.playOverlay}>
+              <View style={styles.playButton}>
+                <Ionicons
+                  name="play"
+                  size={32}
+                  color="#fff"
+                  style={{ marginLeft: 4 }}
+                />
+              </View>
+              <Text style={styles.watchText}>Watch Tutorial</Text>
+            </View>
+          )}
+        </TouchableOpacity>
 
         <View style={styles.rowTop}>
           <View style={{ flex: 1 }}>
@@ -169,22 +212,127 @@ export default function ExerciseDetailScreen() {
         </TouchableOpacity>
         <View style={{ height: 40 }} />
       </ScrollView>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(false);
+          setPlaying(false);
+        }}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Tutorial</Text>
+              <TouchableOpacity
+                onPress={() => {
+                  setModalVisible(false);
+                  setPlaying(false);
+                }}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <Ionicons name="close-circle" size={36} color="#fff" />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.videoWrapper}>
+              <YoutubePlayer
+                height={220}
+                width={width}
+                play={true}
+                videoId={videoId}
+                onChangeState={onStateChange}
+              />
+            </View>
+
+            <Text style={styles.modalSubText}>Watching: {safeItem.name}</Text>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  image: {
-    width: "100%",
-    height: 260,
-    borderRadius: 20,
+  imageContainer: {
     marginBottom: 18,
+    borderRadius: 20,
+    overflow: "hidden",
+    position: "relative",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 5,
     elevation: 5,
   },
+  image: {
+    width: "100%",
+    height: 260,
+    resizeMode: "cover",
+  },
+  playOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.3)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  playButton: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: "rgba(255, 92, 124, 0.9)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 8,
+    borderWidth: 2,
+    borderColor: "#fff",
+  },
+  watchText: {
+    color: "#fff",
+    fontWeight: "700",
+    fontSize: 14,
+    letterSpacing: 0.5,
+  },
+
+  modalContainer: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.9)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    width: "100%",
+    alignItems: "center",
+  },
+  modalHeader: {
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    marginBottom: 20,
+    position: "absolute",
+    top: -50,
+    zIndex: 10,
+  },
+  modalTitle: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "700",
+  },
+  videoWrapper: {
+    width: "100%",
+    aspectRatio: 16 / 9,
+    backgroundColor: "#000",
+  },
+  modalSubText: {
+    color: "#ccc",
+    marginTop: 20,
+    fontSize: 14,
+  },
+
   rowTop: {
     flexDirection: "row",
     justifyContent: "space-between",
