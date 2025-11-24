@@ -3,7 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  StatusBar,
   TouchableOpacity,
   ActivityIndicator,
   Animated,
@@ -86,12 +85,6 @@ export default function HomeScreen() {
       />
 
       <View style={styles.overlay} />
-
-      <StatusBar
-        translucent
-        backgroundColor="transparent"
-        barStyle="light-content"
-      />
       <Header
         title="FitFlow"
         onPressMenu={() => {}}
