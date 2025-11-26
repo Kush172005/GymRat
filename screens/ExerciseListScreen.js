@@ -12,11 +12,18 @@ export default function ExerciseListScreen() {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
 
-  async function fetchExercises() {
-    await new Promise((resolve) => setTimeout(resolve, 2500));
-
-    setData(EXERCISE_DATA);
-    setLoading(false);
+  function fetchExercises() {
+    fetch("https://quiz-app-backend-code.onrender.com/api/exercises")
+      .then((response) => response.json())
+      .then((json) => {
+        setData(json);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error(error);
+        setData(EXERCISE_DATA);
+        setLoading(false);
+      });
   }
 
   useEffect(() => {

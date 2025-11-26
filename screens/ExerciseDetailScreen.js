@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   View,
   Text,
@@ -13,27 +13,30 @@ import {
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import YoutubePlayer from "react-native-youtube-iframe";
+import { useVideoPlayer, VideoView } from "expo-video";
 
 import Header from "../components/Header";
 
-const getYoutubeId = (url) => {
-  if (!url) return null;
-  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-  const match = url.match(regExp);
-  return match && match[2].length === 11 ? match[2] : null;
+const VIDEO_ASSETS = {
+  1: require("../assets/videos/barbell_bench_press.mp4"),
+  2: require("../assets/videos/barbell_squat.mp4"),
+  3: require("../assets/videos/barbell_deadlift.mp4"),
+  4: require("../assets/videos/barbell_overhead_press.mp4"),
+  5: require("../assets/videos/pullups.mp4"),
+  6: require("../assets/videos/dumbell_curl.mp4"),
+  13: require("../assets/videos/push_up.mp4"),
 };
+
+const PLACEHOLDER_SOURCE =
+  "https://cdn.pixabay.com/video/2023/11/02/187612-880737125_large.mp4";
 
 const renderBoldedText = (text) => {
   const steps = text.split("\n");
-
   return steps
     .map((step, index) => {
       const trimmedStep = step.trim();
       if (!trimmedStep) return null;
-
       const colonIndex = trimmedStep.indexOf(":");
-
       if (colonIndex > 0) {
         const title = trimmedStep.substring(0, colonIndex + 1);
         const instruction = trimmedStep.substring(colonIndex + 1);
@@ -73,12 +76,24 @@ export default function ExerciseDetailScreen() {
 
   const [fav, setFav] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const [playing, setPlaying] = useState(false);
 
   const pulseAnim = useRef(new Animated.Value(1)).current;
-  const { width } = Dimensions.get("window");
 
-  const videoId = getYoutubeId(item?.videoUrl);
+  const assetSource = VIDEO_ASSETS[item.id]
+    ? VIDEO_ASSETS[item.id]
+    : PLACEHOLDER_SOURCE;
+
+  const player = useVideoPlayer(assetSource, (player) => {
+    player.loop = true;
+  });
+
+  useEffect(() => {
+    if (modalVisible) {
+      player.play();
+    } else {
+      player.pause();
+    }
+  }, [modalVisible, player]);
 
   useEffect(() => {
     (async () => {
@@ -87,12 +102,6 @@ export default function ExerciseDetailScreen() {
         setFav(!!v);
       } catch (e) {}
     })();
-  }, []);
-
-  const onStateChange = useCallback((state) => {
-    if (state === "ended") {
-      setPlaying(false);
-    }
   }, []);
 
   const runPulseAnimation = () => {
@@ -137,8 +146,7 @@ export default function ExerciseDetailScreen() {
       item?.description ||
       "No simple instructions available. Consult a trainer.",
     beginnerTips:
-      item?.beginnerTips ||
-      "• Prioritize form over weight.\n• Always warm up before starting.\n• Listen to your body and stop if you feel sharp pain.",
+      item?.beginnerTips || "• Prioritize form over weight.\n• Always warm up.",
   };
 
   return (
@@ -152,13 +160,13 @@ export default function ExerciseDetailScreen() {
       <ScrollView contentContainerStyle={{ padding: 18 }}>
         <TouchableOpacity
           activeOpacity={0.9}
-          onPress={() => videoId && setModalVisible(true)}
+          onPress={() => setModalVisible(true)}
           style={styles.imageContainer}
         >
           <Image source={{ uri: safeItem.image }} style={styles.image} />
 
-          {videoId && (
-            <View style={styles.playOverlay}>
+          <View style={styles.playOverlay}>
+            <View style={styles.glassEffect}>
               <View style={styles.playButton}>
                 <Ionicons
                   name="play"
@@ -169,7 +177,7 @@ export default function ExerciseDetailScreen() {
               </View>
               <Text style={styles.watchText}>Watch Tutorial</Text>
             </View>
-          )}
+          </View>
         </TouchableOpacity>
 
         <View style={styles.rowTop}>
@@ -214,41 +222,32 @@ export default function ExerciseDetailScreen() {
       </ScrollView>
 
       <Modal
-        animationType="slide"
+        animationType="fade"
         transparent={true}
         visible={modalVisible}
-        onRequestClose={() => {
-          setModalVisible(false);
-          setPlaying(false);
-        }}
+        onRequestClose={() => setModalVisible(false)}
+        statusBarTranslucent={true}
       >
         <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Tutorial</Text>
-              <TouchableOpacity
-                onPress={() => {
-                  setModalVisible(false);
-                  setPlaying(false);
-                }}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              >
-                <Ionicons name="close-circle" size={36} color="#fff" />
-              </TouchableOpacity>
-            </View>
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={() => setModalVisible(false)}
+            hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+          >
+            <Ionicons name="close" size={28} color="#fff" />
+          </TouchableOpacity>
 
-            <View style={styles.videoWrapper}>
-              <YoutubePlayer
-                height={220}
-                width={width}
-                play={true}
-                videoId={videoId}
-                onChangeState={onStateChange}
-              />
-            </View>
-
-            <Text style={styles.modalSubText}>Watching: {safeItem.name}</Text>
+          <View style={styles.videoWrapper}>
+            <VideoView
+              style={styles.video}
+              player={player}
+              allowsPictureInPicture
+              nativeControls={true}
+              contentFit="contain"
+            />
           </View>
+
+          <Text style={styles.modalSubText}>{safeItem.name}</Text>
         </View>
       </Modal>
     </View>
@@ -258,81 +257,90 @@ export default function ExerciseDetailScreen() {
 const styles = StyleSheet.create({
   imageContainer: {
     marginBottom: 18,
-    borderRadius: 20,
+    borderRadius: 24,
     overflow: "hidden",
     position: "relative",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 5,
+    height: 280,
+    backgroundColor: "#000",
+    shadowColor: "#ff5c7c",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 8,
   },
   image: {
     width: "100%",
-    height: 260,
+    height: "100%",
     resizeMode: "cover",
+    opacity: 0.9,
   },
   playOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.3)",
     justifyContent: "center",
     alignItems: "center",
   },
+  glassEffect: {
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(0,0,0,0.3)",
+    width: "100%",
+    height: "100%",
+  },
   playButton: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: "rgba(255, 92, 124, 0.9)",
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.5)",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 8,
-    borderWidth: 2,
-    borderColor: "#fff",
+    marginBottom: 10,
   },
   watchText: {
     color: "#fff",
     fontWeight: "700",
-    fontSize: 14,
+    fontSize: 16,
     letterSpacing: 0.5,
+    textShadowColor: "rgba(0, 0, 0, 0.75)",
+    textShadowOffset: { width: -1, height: 1 },
+    textShadowRadius: 10,
   },
 
+  // MODAL STYLES
   modalContainer: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.9)",
+    backgroundColor: "rgba(0,0,0,0.95)",
     justifyContent: "center",
     alignItems: "center",
   },
-  modalContent: {
-    width: "100%",
-    alignItems: "center",
-  },
-  modalHeader: {
-    width: "100%",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    marginBottom: 20,
+  closeButton: {
     position: "absolute",
-    top: -50,
+    top: 50,
+    right: 25,
+    backgroundColor: "rgba(255,255,255,0.1)",
+    borderRadius: 20,
+    padding: 8,
     zIndex: 10,
-  },
-  modalTitle: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "700",
   },
   videoWrapper: {
     width: "100%",
-    aspectRatio: 16 / 9,
+    height: 300,
+    justifyContent: "center",
     backgroundColor: "#000",
   },
+  video: {
+    width: "100%",
+    height: "100%",
+  },
   modalSubText: {
-    color: "#ccc",
+    color: "#888",
     marginTop: 20,
-    fontSize: 14,
+    fontSize: 16,
+    fontWeight: "600",
   },
 
+  // TEXT CONTENT STYLES
   rowTop: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -342,37 +350,42 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: "900",
     color: "#0f172a",
+    letterSpacing: -0.5,
   },
   meta: {
-    color: "#888",
+    color: "#64748b",
     marginTop: 4,
     fontSize: 16,
-    fontWeight: "500",
+    fontWeight: "600",
   },
   favBtn: {
     padding: 10,
-    borderRadius: 14,
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
+    elevation: 2,
   },
   section: {
-    marginTop: 20,
+    marginTop: 24,
     paddingBottom: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
   },
   header: {
     fontSize: 20,
     fontWeight: "800",
     color: "#0f172a",
+    marginBottom: 8,
   },
   text: {
     fontSize: 16,
-    color: "#444",
-    lineHeight: 24,
-    marginTop: 0,
+    color: "#334155",
+    lineHeight: 26,
   },
   boldText: {
     fontWeight: "800",
-    color: "#111",
+    color: "#0f172a",
   },
   spacerText: {
     fontSize: 5,
@@ -381,13 +394,13 @@ const styles = StyleSheet.create({
     marginTop: 30,
     backgroundColor: "#ff5c7c",
     paddingVertical: 18,
-    borderRadius: 16,
+    borderRadius: 20,
     alignItems: "center",
     shadowColor: "#ff5c7c",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 12,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: 10,
   },
   buttonText: {
     fontSize: 18,
