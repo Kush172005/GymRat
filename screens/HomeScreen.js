@@ -43,7 +43,7 @@ export default function HomeScreen() {
   const { quote, loading } = useRandomQuote();
 
   const images = [
-    "https://i.pinimg.com/736x/92/56/28/925628108f40efc8b37b971ebdb01ff6.jpg",
+    "https://i.pinimg.com/736x/0c/a7/53/0ca7534669efb0ed5a111a99db775cdf.jpg",
     "https://i.pinimg.com/1200x/04/2f/24/042f24d95e88ce396fbd22861da9b2f2.jpg",
     "https://i.pinimg.com/1200x/16/15/8d/16158d888b9171fbbcbd0d212549fd14.jpg",
     "https://i.pinimg.com/1200x/5b/90/01/5b90017e5d51dc3c278e08135dd7ecc5.jpg",
