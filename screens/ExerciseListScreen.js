@@ -1,42 +1,59 @@
 import React, { useEffect, useState } from "react";
-import { View, TextInput, FlatList, StyleSheet, Text } from "react-native";
+import {
+  View,
+  TextInput,
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+} from "react-native";
 import Header from "../components/Header";
 import ExerciseCard from "../components/ExerciseCard";
 import { useNavigation } from "@react-navigation/native";
 import { EXERCISE_DATA } from "../data/Excercises";
 import BenchPressLoader from "../components/BenchPressLoader";
 
+const MUSCLE_GROUPS = [
+  "All",
+  "Chest",
+  "Back",
+  "Shoulders",
+  "Biceps",
+  "Triceps",
+  "Legs",
+  "Core",
+];
+
 export default function ExerciseListScreen() {
   const nav = useNavigation();
   const [data, setData] = useState([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
-
-  function fetchExercises() {
-    fetch("https://quiz-app-backend-code.onrender.com/api/exercises")
-      .then((response) => response.json())
-      .then((json) => {
-        setData(json);
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error(error);
-        setData(EXERCISE_DATA);
-        setLoading(false);
-      });
-  }
+  const [selectedMuscle, setSelectedMuscle] = useState("All");
 
   useEffect(() => {
-    fetchExercises();
+    setData(EXERCISE_DATA);
+    setLoading(false);
   }, []);
 
   function handleOpen(item) {
     nav.navigate("Detail", { item });
   }
 
-  const filtered = data.filter((d) =>
-    d.name.toLowerCase().includes(query.toLowerCase())
-  );
+  const filtered = data.filter((d) => {
+    const matchesSearch = d.name.toLowerCase().includes(query.toLowerCase());
+    if (selectedMuscle === "All") return matchesSearch;
+
+    const bodyPartLower = d.bodyPart.toLowerCase();
+    const selectedLower = selectedMuscle.toLowerCase();
+
+    if (selectedLower === "biceps" || selectedLower === "triceps") {
+      return matchesSearch && bodyPartLower === selectedLower;
+    }
+
+    return matchesSearch && bodyPartLower === selectedLower;
+  });
 
   return (
     <View style={styles.page}>
@@ -56,12 +73,40 @@ export default function ExerciseListScreen() {
         />
       </View>
 
+      <View style={styles.filterContainer}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.filterScrollContent}
+        >
+          {MUSCLE_GROUPS.map((muscle) => (
+            <TouchableOpacity
+              key={muscle}
+              style={[
+                styles.filterChipNew,
+                selectedMuscle === muscle && styles.filterChipNewActive,
+              ]}
+              onPress={() => setSelectedMuscle(muscle)}
+            >
+              <Text
+                style={[
+                  styles.filterChipLabel,
+                  selectedMuscle === muscle && styles.filterChipLabelActive,
+                ]}
+              >
+                {muscle}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+
       {loading ? (
         <BenchPressLoader />
       ) : filtered.length === 0 ? (
         <View style={styles.emptyWrap}>
           <Text style={styles.emptyText}>
-            No exercises found matching "{query}"
+            No exercises found for "{query || selectedMuscle}"
           </Text>
         </View>
       ) : (
@@ -82,8 +127,17 @@ export default function ExerciseListScreen() {
 }
 
 const styles = StyleSheet.create({
-  page: { flex: 1, backgroundColor: "#f7fbff" },
-  searchWrap: { paddingHorizontal: 16, paddingTop: 12, paddingBottom: 8 },
+  page: {
+    flex: 1,
+    backgroundColor: "#f7fbff",
+  },
+
+  searchWrap: {
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 8,
+  },
+
   search: {
     backgroundColor: "#fff",
     padding: 14,
@@ -97,16 +151,64 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 3,
   },
+
+  filterContainer: {
+    width: "100%",
+    paddingTop: 4,
+    paddingBottom: 12,
+    backgroundColor: "#f7fbff",
+  },
+
+  filterScrollContent: {
+    paddingLeft: 16,
+    paddingRight: 8,
+    alignItems: "center",
+  },
+
+  filterChipNew: {
+    paddingHorizontal: 18,
+    paddingVertical: 9,
+    backgroundColor: "#ffffff",
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: "#e5e8ed",
+
+    marginRight: 10,
+
+    // Prevent collapse/shrink
+    flexShrink: 0,
+    height: 36,
+
+    justifyContent: "center",
+  },
+
+  filterChipNewActive: {
+    backgroundColor: "#ff577b",
+    borderColor: "#ff577b",
+  },
+
+  filterChipLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#64748b",
+  },
+
+  filterChipLabelActive: {
+    color: "#ffffff",
+  },
+
   listContent: {
     padding: 16,
     paddingBottom: 100,
   },
+
   emptyWrap: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
   },
+
   emptyText: {
     fontSize: 16,
     color: "#666",

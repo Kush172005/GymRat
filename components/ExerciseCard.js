@@ -7,11 +7,7 @@ export default function ExerciseCard({ item, onPress }) {
       style={cardStyles.container}
       onPress={() => onPress(item)}
     >
-      <Image
-        source={{ uri: item.image }}
-        style={cardStyles.image}
-        resizeMode="cover"
-      />
+      <Image source={item.image} style={cardStyles.image} resizeMode="cover" />
       <View style={cardStyles.info}>
         <Text numberOfLines={1} style={cardStyles.name}>
           {item.name}
