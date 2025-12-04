@@ -12,21 +12,40 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.kush2005.GymRat",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSMotionUsageDescription": "GymRat uses motion data to count your steps."
+      }
     },
+
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.kush2005.GymRat",
+      "permissions": [
+        "android.permission.ACTIVITY_RECOGNITION"
+      ]
     },
+
     "web": {
       "favicon": "./assets/favicon.png"
     },
+
     "plugins": [
       "expo-video"
-    ]
+    ],
+
+    "extra": {
+      "eas": {
+        "projectId": "aff99afd-22d6-4f7a-bc3b-27cb733c13dd"
+      }
+    }
   }
 }

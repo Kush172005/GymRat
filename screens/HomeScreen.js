@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
 import Header from "../components/Header";
 
 function useRandomQuote() {
@@ -116,6 +117,23 @@ export default function HomeScreen() {
             </View>
           </View>
 
+          <TouchableOpacity
+            style={styles.stepTrackerCard}
+            onPress={() => nav.navigate("StepTracker")}
+            activeOpacity={0.8}
+          >
+            <View style={styles.stepTrackerIcon}>
+              <Ionicons name="walk" size={32} color="#ff577b" />
+            </View>
+            <View style={styles.stepTrackerContent}>
+              <Text style={styles.stepTrackerTitle}>Daily Step Tracker</Text>
+              <Text style={styles.stepTrackerSubtitle}>
+                Track your daily steps and reach your fitness goals
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={24} color="#fff" />
+          </TouchableOpacity>
+
           <View style={styles.quoteCard}>
             <Text style={styles.quoteHeader}>Daily Motivation ⚡</Text>
             {loading ? (
@@ -196,6 +214,45 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "600",
     fontSize: 16,
+  },
+  stepTrackerCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.15)",
+    borderColor: "rgba(255,255,255,0.3)",
+    borderWidth: 1,
+    padding: 16,
+    borderRadius: 16,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  stepTrackerIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "rgba(255,255,255,0.9)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 14,
+  },
+  stepTrackerContent: {
+    flex: 1,
+  },
+  stepTrackerTitle: {
+    fontSize: 17,
+    fontWeight: "800",
+    color: "#fff",
+    marginBottom: 4,
+  },
+  stepTrackerSubtitle: {
+    fontSize: 13,
+    color: "#e2e8f0",
+    fontWeight: "500",
+    lineHeight: 18,
   },
   quoteCard: {
     backgroundColor: "rgba(255,255,255,0.12)",

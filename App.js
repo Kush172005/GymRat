@@ -6,6 +6,7 @@ import HomeScreen from "./screens/HomeScreen";
 import ExerciseListScreen from "./screens/ExerciseListScreen";
 import ExerciseDetailScreen from "./screens/ExerciseDetailScreen";
 import FavoritesScreen from "./screens/FavoritesScreen";
+import StepTrackerScreen from "./screens/StepTrackerScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -18,6 +19,7 @@ export default function App() {
           <Stack.Screen name="List" component={ExerciseListScreen} />
           <Stack.Screen name="Detail" component={ExerciseDetailScreen} />
           <Stack.Screen name="Favorites" component={FavoritesScreen} />
+          <Stack.Screen name="StepTracker" component={StepTrackerScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>

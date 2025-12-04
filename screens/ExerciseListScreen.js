@@ -172,13 +172,9 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     borderWidth: 1,
     borderColor: "#e5e8ed",
-
-    marginRight: 10,
-
-    // Prevent collapse/shrink
+    marginRight: 6,
     flexShrink: 0,
     height: 36,
-
     justifyContent: "center",
   },
 
