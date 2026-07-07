@@ -33,8 +33,10 @@ export default function ExerciseListScreen() {
   const [selectedMuscle, setSelectedMuscle] = useState("All");
 
   useEffect(() => {
-    setData(EXERCISE_DATA);
-    setLoading(false);
+    setTimeout(() => {
+      setData(EXERCISE_DATA);
+      setLoading(false);
+    }, 2500);
   }, []);
 
   function handleOpen(item) {
@@ -43,14 +45,11 @@ export default function ExerciseListScreen() {
 
   const filtered = data.filter((d) => {
     const matchesSearch = d.name.toLowerCase().includes(query.toLowerCase());
+
     if (selectedMuscle === "All") return matchesSearch;
 
     const bodyPartLower = d.bodyPart.toLowerCase();
     const selectedLower = selectedMuscle.toLowerCase();
-
-    if (selectedLower === "biceps" || selectedLower === "triceps") {
-      return matchesSearch && bodyPartLower === selectedLower;
-    }
 
     return matchesSearch && bodyPartLower === selectedLower;
   });
