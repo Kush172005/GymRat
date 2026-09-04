@@ -5,43 +5,70 @@
     "version": "1.0.0",
     "orientation": "default",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
-    "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-
+    "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.kush2005.GymRat",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
-        "NSMotionUsageDescription": "GymRat uses motion data to count your steps."
+        "NSMotionUsageDescription": "GymRat reads this iPhone’s step sensor (Motion & Fitness) when Apple Health is not available, such as in Expo Go.",
+        "NSHealthShareUsageDescription": "GymRat reads steps, heart rate, calories, distance, sleep, weight, and workouts from Apple Health so your Activity screen matches Fitness and Apple Watch.",
+        "NSHealthUpdateUsageDescription": "GymRat does not write to Apple Health. This text is required by iOS when HealthKit is enabled."
       }
     },
-
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true,
       "package": "com.kush2005.GymRat",
       "permissions": [
-        "android.permission.ACTIVITY_RECOGNITION"
+        "android.permission.ACTIVITY_RECOGNITION",
+        "android.permission.health.READ_STEPS",
+        "android.permission.health.READ_HEART_RATE",
+        "android.permission.health.READ_ACTIVE_CALORIES_BURNED",
+        "android.permission.health.READ_TOTAL_CALORIES_BURNED",
+        "android.permission.health.READ_WEIGHT",
+        "android.permission.health.READ_EXERCISE",
+        "android.permission.health.READ_DISTANCE",
+        "android.permission.health.READ_SLEEP",
+        "android.permission.health.READ_ELEVATION_GAINED"
       ]
     },
-
     "web": {
       "favicon": "./assets/favicon.png"
     },
-
     "plugins": [
-      "expo-video"
+      "expo-video",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "backgroundColor": "#0D0D10",
+          "resizeMode": "contain"
+        }
+      ],
+      "expo-sqlite",
+      "expo-dev-client",
+      "react-native-health-connect",
+      "./plugins/withHealthConnectQueries",
+      [
+        "@kingstinct/react-native-healthkit",
+        {
+          "NSHealthShareUsageDescription": "GymRat reads steps, heart rate, calories, distance, sleep, weight, and workouts from Apple Health so your Activity screen matches Fitness and Apple Watch.",
+          "NSHealthUpdateUsageDescription": "GymRat does not write to Apple Health. This text is required by iOS when HealthKit is enabled.",
+          "background": false
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "minSdkVersion": 26
+          }
+        }
+      ]
     ],
-
     "extra": {
       "eas": {
         "projectId": "aff99afd-22d6-4f7a-bc3b-27cb733c13dd"
