@@ -12,9 +12,30 @@ Workout logging with automatic PR tracking, real step/health data from Apple Hea
 [![TypeScript](https://img.shields.io/badge/TypeScript-Strict-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![SQLite](https://img.shields.io/badge/SQLite-On--Device-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://www.sqlite.org)
 [![Platform](https://img.shields.io/badge/Platform-iOS%20%7C%20Android-8A2BE2?style=for-the-badge)](#-getting-started)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](./LICENSE)
 
 </div>
+
+---
+
+## Screenshots
+
+<table>
+  <tr>
+    <td align="center"><img src="./assets/Demo-Images/IMG_4730.png" width="220"/><br/><b>Home</b></td>
+    <td align="center"><img src="./assets/Demo-Images/IMG_4731.png" width="220"/><br/><b>Exercise Library</b></td>
+    <td align="center"><img src="./assets/Demo-Images/IMG_4732.png" width="220"/><br/><b>Fuel — Nutrition</b></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="./assets/Demo-Images/IMG_4733.png" width="220"/><br/><b>You — Hub</b></td>
+    <td align="center"><img src="./assets/Demo-Images/IMG_4735.png" width="220"/><br/><b>Training Plan</b></td>
+    <td align="center"><img src="./assets/Demo-Images/IMG_4736.png" width="220"/><br/><b>Progress & PRs</b></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="./assets/Demo-Images/IMG_4737.png" width="220"/><br/><b>Activity Tracking</b></td>
+    <td align="center"><img src="./assets/Demo-Images/IMG_4738.png" width="220"/><br/><b>Custom Exercise</b></td>
+    <td align="center"><img src="./assets/Demo-Images/IMG_4734.png" width="220"/><br/><b>Settings</b></td>
+  </tr>
+</table>
 
 ---
 
@@ -38,7 +59,6 @@ Workout logging with automatic PR tracking, real step/health data from Apple Hea
 8. [Permissions & Health Data](#-permissions--health-data)
 9. [Engineering Decisions](#engineering-decisions)
 10. [Roadmap](#-roadmap)
-11. [License](#license)
 
 ---
 
@@ -274,10 +294,6 @@ A few deliberate tradeoffs, in case they come up:
 - [ ] Body-weight and measurement tracking over time
 - [ ] Barcode scanning for food logging
 - [ ] Optional cloud backup/multi-device sync
-
-## License
-
-MIT — see [`LICENSE`](./LICENSE).
 
 <div align="center">
 
