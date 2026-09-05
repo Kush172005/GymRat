@@ -3,7 +3,6 @@ import { ThemeMode } from '../theme/ThemeContext';
 
 const DEFAULTS: Record<string, string> = {
   units: 'kg',
-  rest_default: '90',
   theme_mode: 'system',
   onboarding_done: 'false',
 };
@@ -59,7 +58,7 @@ export const settingsRepo = {
     const db = getDb();
     // Preserve onboarding state on full data-clear; only wipe user data keys.
     db.runSync(
-      `DELETE FROM settings WHERE key NOT IN ('onboarding_done', 'theme_mode', 'units', 'rest_default')`,
+      `DELETE FROM settings WHERE key NOT IN ('onboarding_done', 'theme_mode', 'units')`,
     );
   },
 };

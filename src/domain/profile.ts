@@ -14,6 +14,7 @@ export type GoalType =
   | 'workout_frequency';
 
 export interface UserProfile {
+  name?: string;
   sex: Sex;
   age: number;
   heightCm: number;

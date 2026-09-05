@@ -9,7 +9,6 @@ import { emptySnapshot, HealthProvider, HealthSnapshot, HealthStatus } from './t
 
 let native: HealthProvider | null | undefined;
 let watchSub: { remove: () => void } | null = null;
-let usingNative = false;
 
 async function loadNative(): Promise<HealthProvider | null> {
   if (native !== undefined) return native;
@@ -50,7 +49,14 @@ export async function requestHealth(): Promise<{ status: HealthStatus; source: H
   const n = await loadNative();
   if (n) {
     const s = await n.request();
-    if (s === 'granted') return { status: s, source: n.id };
+    if (s === 'granted') {
+      // Health Connect only has step data if some other app (Google Fit, Samsung
+      // Health, a fitness tracker...) is writing into it — most phones have nothing
+      // doing that. Also grab the phone's own step-sensor permission in the background
+      // so we can still show real steps even when Health Connect itself is empty.
+      if (Platform.OS === 'android') pedometerProvider.request().catch(() => {});
+      return { status: s, source: n.id };
+    }
     if (s === 'needs_install') return { status: s, source: n.id };
   }
   const p = await pedometerProvider.request();
@@ -62,14 +68,20 @@ export async function readHealth(): Promise<HealthSnapshot> {
   if (n) {
     const s = await n.getStatus();
     if (s === 'granted') {
-      usingNative = true;
-      stopPedometerWatch();
       const snap = await n.readToday();
+      if (Platform.OS === 'android') {
+        // Steps specifically can also come from the phone's own sensor (see above) —
+        // use whichever is higher instead of trusting an empty Health Connect record.
+        const sensorSteps = stepsRepo.getTodaySteps();
+        if (sensorSteps > snap.steps) {
+          snap.steps = sensorSteps;
+          if (snap.week.length) snap.week[snap.week.length - 1].steps = sensorSteps;
+        }
+      }
       persist(snap);
       return snap;
     }
   }
-  usingNative = false;
   const snap = await pedometerProvider.readToday();
   persist(snap);
   return snap;
@@ -82,7 +94,6 @@ function persist(snap: HealthSnapshot): void {
 }
 
 export function startPedometerWatch(onSteps: (n: number) => void): void {
-  if (usingNative || Platform.OS === 'ios') return;
   if (watchSub) return;
   watchSub = Pedometer.watchStepCount((result) => {
     onSteps(stepsRepo.addTodaySteps(result.steps));

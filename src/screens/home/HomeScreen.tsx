@@ -22,6 +22,7 @@ import { fontFamily, fontSize } from '../../theme/typography';
 import { spacing, radius } from '../../theme/spacing';
 import { profileRepo } from '../../db/profileRepo';
 import { nutritionRepo } from '../../db/nutritionRepo';
+import { workoutRepo, WorkoutSession } from '../../db/workoutRepo';
 import { computeTargets } from '../../domain/nutrition';
 import { planForGoal, todaysPlanDay } from '../../domain/plans';
 import { useSteps } from '../../hooks/useSteps';
@@ -88,6 +89,9 @@ export function HomeScreen() {
 
   const [proteinLeft, setProteinLeft] = useState<number | null>(null);
   const [todayPlanTitle, setTodayPlanTitle] = useState<string | null>(null);
+  const [inProgress, setInProgress] = useState<WorkoutSession | null>(null);
+  const [streak, setStreak] = useState(0);
+  const [firstName, setFirstName] = useState<string | null>(null);
   const { steps } = useSteps();
   const stepGoal = (() => {
     const profile = profileRepo.get();
@@ -124,10 +128,14 @@ export function HomeScreen() {
         const plan = planForGoal(profile.goal, profile.daysPerWeek, profile.experience);
         const day = todaysPlanDay(plan, profile.daysPerWeek);
         setTodayPlanTitle(day ? day.title : 'Rest day');
+        setFirstName(profile.name?.trim().split(' ')[0] || null);
       } else {
         setProteinLeft(null);
         setTodayPlanTitle(null);
+        setFirstName(null);
       }
+      setInProgress(workoutRepo.getInProgressSession());
+      setStreak(workoutRepo.getProgressStats().streak);
     }, []),
   );
 
@@ -151,7 +159,7 @@ export function HomeScreen() {
         {/* Header */}
         <View style={[styles.header, { paddingTop: insets.top + spacing.md }]}>
           <View>
-            <Text style={styles.greeting}>Good {getGreeting()}</Text>
+            <Text style={styles.greeting}>Good {getGreeting()}{firstName ? `, ${firstName}` : ''}</Text>
             <Text style={styles.appName}>GymRat</Text>
           </View>
           <TouchableOpacity
@@ -215,9 +223,35 @@ export function HomeScreen() {
             <Text style={styles.statValue}>{steps.toLocaleString()}</Text>
             <Text style={styles.statLabel}>/ {stepGoal >= 1000 ? `${Math.round(stepGoal / 1000)}k` : stepGoal}</Text>
           </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.statCard, { backgroundColor: 'rgba(255,255,255,0.13)', borderColor: 'rgba(255,255,255,0.2)' }]}
+            onPress={() => (nav as any).navigate('You', { screen: 'WorkoutHistory' })}
+            activeOpacity={0.8}
+            accessibilityRole="button"
+            accessibilityLabel="View workout streak"
+          >
+            <Ionicons name="flame-outline" size={20} color={colors.warning} />
+            <Text style={styles.statValue}>{streak}</Text>
+            <Text style={styles.statLabel}>Day streak</Text>
+          </TouchableOpacity>
         </View>
 
-        {todayPlanTitle ? (
+        {inProgress ? (
+          <TouchableOpacity
+            style={[styles.lastWorkout, { backgroundColor: colors.primarySubtle, borderColor: colors.primary }]}
+            onPress={() => (nav as any).navigate('You', { screen: 'ActiveWorkout', params: { sessionId: inProgress.id } })}
+            activeOpacity={0.8}
+            accessibilityRole="button"
+            accessibilityLabel="Continue in-progress workout"
+          >
+            <View style={styles.lastWorkoutLeft}>
+              <Text style={styles.lastWorkoutTitle}>Continue workout</Text>
+              <Text style={styles.lastWorkoutMeta}>Pick up where you left off</Text>
+            </View>
+            <Ionicons name="play-circle" size={28} color={colors.primary} />
+          </TouchableOpacity>
+        ) : todayPlanTitle ? (
           <TouchableOpacity
             style={[styles.lastWorkout, { backgroundColor: 'rgba(255,255,255,0.13)', borderColor: 'rgba(255,255,255,0.2)' }]}
             onPress={() => (nav as any).navigate('You', { screen: 'Plan' })}

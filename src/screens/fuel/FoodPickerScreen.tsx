@@ -7,14 +7,26 @@ import { useTheme } from '../../theme';
 import { fontFamily, fontSize } from '../../theme/typography';
 import { spacing, radius } from '../../theme/spacing';
 import { AppHeader, AppText, Chip } from '../../components/ui';
-import { FOODS, FoodItem } from '../../data/foods';
+import { FOODS, FoodItem, FoodCategory } from '../../data/foods';
 import { nutritionRepo } from '../../db/nutritionRepo';
 import { kcalFromMacros } from '../../domain/nutrition';
+
+const CATEGORIES: Array<{ id: FoodCategory | 'all'; label: string }> = [
+  { id: 'all', label: 'All' },
+  { id: 'protein', label: 'Protein' },
+  { id: 'carb', label: 'Carbs' },
+  { id: 'veg', label: 'Veg' },
+  { id: 'fruit', label: 'Fruit' },
+  { id: 'dairy', label: 'Dairy' },
+  { id: 'fat', label: 'Fats' },
+  { id: 'snack', label: 'Snacks' },
+];
 
 export function FoodPickerScreen() {
   const { colors } = useTheme();
   const nav = useNavigation();
   const [q, setQ] = useState('');
+  const [category, setCategory] = useState<FoodCategory | 'all'>('all');
   const [custom, setCustom] = useState(false);
   const [name, setName] = useState('');
   const [p, setP] = useState('');
@@ -23,9 +35,12 @@ export function FoodPickerScreen() {
 
   const items = useMemo(() => {
     const s = q.trim().toLowerCase();
-    if (!s) return FOODS;
-    return FOODS.filter((food) => food.name.toLowerCase().includes(s));
-  }, [q]);
+    return FOODS.filter((food) => {
+      const matchesSearch = !s || food.name.toLowerCase().includes(s);
+      const matchesCategory = category === 'all' || food.category === category;
+      return matchesSearch && matchesCategory;
+    });
+  }, [q, category]);
 
   const addFood = (food: FoodItem, servings = 1) => {
     nutritionRepo.addLog({
@@ -94,29 +109,77 @@ export function FoodPickerScreen() {
               style={[styles.searchInput, { color: colors.text }]}
             />
           </View>
+          <View style={styles.categoryRow}>
+            <FlatList
+              horizontal
+              data={CATEGORIES}
+              keyExtractor={(c) => c.id}
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ paddingHorizontal: spacing.lg }}
+              renderItem={({ item: c }) => (
+                <Chip label={c.label} selected={category === c.id} onPress={() => setCategory(c.id)} />
+              )}
+            />
+          </View>
           <FlatList
             data={items}
             keyExtractor={(i) => i.id}
             contentContainerStyle={styles.list}
             renderItem={({ item }) => (
-              <TouchableOpacity
-                style={[styles.row, { backgroundColor: colors.surface, borderColor: colors.border }]}
-                onPress={() => addFood(item)}
-                accessibilityRole="button"
-                accessibilityLabel={`Add ${item.name}`}
-              >
-                <View style={{ flex: 1 }}>
-                  <AppText variant="bodySemiBold">{item.name}</AppText>
-                  <AppText variant="caption" color="sub">
-                    {item.serving} · {item.proteinG} g protein · {item.kcal} kcal
-                  </AppText>
-                </View>
-                <Ionicons name="add-circle-outline" size={24} color={colors.primary} />
-              </TouchableOpacity>
+              <FoodRow item={item} colors={colors} onAdd={(servings) => addFood(item, servings)} />
             )}
           />
         </>
       )}
+    </View>
+  );
+}
+
+function FoodRow({
+  item,
+  colors,
+  onAdd,
+}: {
+  item: FoodItem;
+  colors: { surface: string; border: string; surface2: string; primary: string; textMuted: string };
+  onAdd: (servings: number) => void;
+}) {
+  const [qty, setQty] = useState(1);
+
+  return (
+    <View style={[styles.row, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+      <View style={{ flex: 1 }}>
+        <AppText variant="bodySemiBold">{item.name}</AppText>
+        <AppText variant="caption" color="sub">
+          {item.serving} · {Math.round(item.proteinG * qty)} g protein · {Math.round(item.kcal * qty)} kcal
+        </AppText>
+      </View>
+      <View style={styles.stepper}>
+        <TouchableOpacity
+          onPress={() => setQty((n) => Math.max(0.5, n - 0.5))}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          accessibilityRole="button"
+          accessibilityLabel={`Decrease servings of ${item.name}`}
+        >
+          <Ionicons name="remove-circle-outline" size={22} color={colors.textMuted} />
+        </TouchableOpacity>
+        <Text style={[styles.qtyText, { color: colors.textMuted }]}>{qty}×</Text>
+        <TouchableOpacity
+          onPress={() => setQty((n) => n + 0.5)}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          accessibilityRole="button"
+          accessibilityLabel={`Increase servings of ${item.name}`}
+        >
+          <Ionicons name="add-circle-outline" size={22} color={colors.textMuted} />
+        </TouchableOpacity>
+      </View>
+      <TouchableOpacity
+        onPress={() => onAdd(qty)}
+        accessibilityRole="button"
+        accessibilityLabel={`Add ${qty} serving of ${item.name}`}
+      >
+        <Ionicons name="add-circle" size={28} color={colors.primary} />
+      </TouchableOpacity>
     </View>
   );
 }
@@ -157,6 +220,7 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   searchInput: { flex: 1, paddingVertical: spacing.md, fontFamily: fontFamily.body.regular, fontSize: fontSize.md },
+  categoryRow: { marginBottom: spacing.sm },
   list: { padding: spacing.lg, paddingBottom: 40 },
   row: {
     flexDirection: 'row',
@@ -165,6 +229,18 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     padding: spacing.md,
     marginBottom: spacing.sm,
+    gap: spacing.sm,
+  },
+  stepper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+  },
+  qtyText: {
+    fontFamily: fontFamily.body.semiBold,
+    fontSize: fontSize.sm,
+    minWidth: 28,
+    textAlign: 'center',
   },
   input: {
     borderWidth: 1,

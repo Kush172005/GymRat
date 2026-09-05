@@ -9,6 +9,7 @@ import { fontFamily, fontSize } from '../../theme/typography';
 import { spacing } from '../../theme/spacing';
 import { Screen, AppHeader, Card, AppText } from '../../components/ui';
 import { profileRepo } from '../../db/profileRepo';
+import { workoutRepo } from '../../db/workoutRepo';
 import { GOAL_OPTIONS } from '../../domain/profile';
 import { YouStackParamList } from '../../navigation/types';
 
@@ -18,12 +19,20 @@ export function YouHomeScreen() {
   const nav = useNavigation<Nav>();
   const { colors } = useTheme();
   const [profile, setProfile] = useState(() => profileRepo.get());
+  const [streak, setStreak] = useState(0);
 
   useFocusEffect(
     React.useCallback(() => {
       setProfile(profileRepo.get());
+      setStreak(workoutRepo.getProgressStats().streak);
     }, []),
   );
+
+  const startEmptyWorkout = () => {
+    const inProgress = workoutRepo.getInProgressSession();
+    const session = inProgress ?? workoutRepo.createSession();
+    nav.navigate('ActiveWorkout', { sessionId: session.id });
+  };
 
   const goalLabel = profile
     ? GOAL_OPTIONS.find((g) => g.id === profile.goal)?.label
@@ -63,8 +72,21 @@ export function YouHomeScreen() {
         </TouchableOpacity>
       </Card>
 
+      <Card onPress={startEmptyWorkout} accessibilityLabel="Start a workout">
+        <Row icon="play-circle-outline" colors={colors} title="Start workout" subtitle="Log sets, weight, and reps" />
+      </Card>
+
       <Card onPress={() => nav.navigate('Plan')} accessibilityLabel="Open training plan">
         <Row icon="calendar-outline" colors={colors} title="Training plan" subtitle="Pre-built days from your goal" />
+      </Card>
+
+      <Card onPress={() => nav.navigate('WorkoutHistory')} accessibilityLabel="Open workout history and progress">
+        <Row
+          icon="trophy-outline"
+          colors={colors}
+          title="Progress"
+          subtitle={streak > 0 ? `${streak}-day streak · PRs and history` : 'Streak, PRs, and history'}
+        />
       </Card>
 
       <Card onPress={() => nav.navigate('Steps')} accessibilityLabel="Open activity">

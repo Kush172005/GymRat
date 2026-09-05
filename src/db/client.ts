@@ -29,11 +29,13 @@ export function initDatabase(): void {
   // ── Custom exercises ────────────────────────────────────────────────────────
   _db.execSync(`
     CREATE TABLE IF NOT EXISTS custom_exercises (
-      id         TEXT PRIMARY KEY NOT NULL,
-      name       TEXT    NOT NULL,
-      body_part  TEXT    NOT NULL,
-      equipment  TEXT    NOT NULL,
-      created_at INTEGER NOT NULL
+      id            TEXT PRIMARY KEY NOT NULL,
+      name          TEXT    NOT NULL,
+      body_part     TEXT    NOT NULL,
+      equipment     TEXT    NOT NULL,
+      description   TEXT    NOT NULL DEFAULT '',
+      beginner_tips TEXT    NOT NULL DEFAULT '',
+      created_at    INTEGER NOT NULL
     );
   `);
 

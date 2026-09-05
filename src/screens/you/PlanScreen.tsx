@@ -1,19 +1,22 @@
 import React, { useMemo, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { useTheme } from '../../theme';
 import { fontFamily, fontSize } from '../../theme/typography';
 import { spacing } from '../../theme/spacing';
-import { Screen, AppHeader, Card, AppText, EmptyState } from '../../components/ui';
+import { Screen, AppHeader, Card, AppText, Button, EmptyState } from '../../components/ui';
 import { profileRepo } from '../../db/profileRepo';
+import { workoutRepo } from '../../db/workoutRepo';
 import { planForGoal, todaysPlanDay } from '../../domain/plans';
 import { GOAL_OPTIONS } from '../../domain/profile';
+import { YouStackScreenProps } from '../../navigation/types';
 
-export function PlanScreen() {
+type Props = YouStackScreenProps<'Plan'>;
+
+export function PlanScreen({ navigation: nav }: Props) {
   const { colors } = useTheme();
-  const nav = useNavigation();
   const [profile, setProfile] = useState(() => profileRepo.get());
 
   useFocusEffect(
@@ -39,7 +42,7 @@ export function PlanScreen() {
           title="No plan yet"
           subtitle="Set a goal and training days. GymRat assigns a pre-built plan from your exercise library."
           actionLabel="Set goals"
-          onAction={() => (nav as any).navigate('ProfileSetup')}
+          onAction={() => nav.navigate('ProfileSetup')}
         />
       </Screen>
     );
@@ -72,7 +75,20 @@ export function PlanScreen() {
               <AppText variant="caption" color="sub" style={{ marginTop: spacing.md }}>
                 Keep the run easy enough to talk. No GPS required — just go outside.
               </AppText>
-            ) : null}
+            ) : (
+              <Button
+                title={workoutRepo.getInProgressSession() ? 'Continue Workout' : 'Start Workout'}
+                fullWidth
+                style={{ marginTop: spacing.lg }}
+                onPress={() => {
+                  const inProgress = workoutRepo.getInProgressSession();
+                  const session = inProgress ?? workoutRepo.startFromPlan(
+                    today.exercises.map((ex) => ({ exerciseId: ex.exerciseId, name: ex.name })),
+                  );
+                  nav.navigate('ActiveWorkout', { sessionId: session.id });
+                }}
+              />
+            )}
           </>
         ) : (
           <AppText variant="body" color="sub" style={{ marginTop: spacing.sm }}>

@@ -173,12 +173,14 @@ export function ExerciseDetailScreen({ route, navigation }: Props) {
         </View>
 
         {/* Instructions */}
-        <Card style={styles.section}>
-          <AppText variant="sectionHeader" style={{ marginBottom: spacing.md }}>
-            How to Do It
-          </AppText>
-          {renderInstructions(item.description)}
-        </Card>
+        {item.description.trim() ? (
+          <Card style={styles.section}>
+            <AppText variant="sectionHeader" style={{ marginBottom: spacing.md }}>
+              How to Do It
+            </AppText>
+            {renderInstructions(item.description)}
+          </Card>
+        ) : null}
 
         {/* Beginner tips */}
         {item.beginnerTips ? (

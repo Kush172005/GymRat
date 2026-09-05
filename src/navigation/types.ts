@@ -34,7 +34,7 @@ export type HomeStackParamList = {
 };
 
 export type ExercisesStackParamList = {
-  ExerciseList: undefined;
+  ExerciseList: { pickForSessionId?: string } | undefined;
   ExerciseDetail: { item: Exercise };
   Favorites: undefined;
 };
@@ -52,6 +52,15 @@ export type YouStackParamList = {
   Plan: undefined;
   ProfileSetup: undefined;
   Steps: undefined;
+  ActiveWorkout: { sessionId: string };
+  WorkoutSummary: {
+    sessionId: string;
+    priorPRs: Record<string, { weight_kg: number; reps: number } | null>;
+  };
+  WorkoutHistory: undefined;
+  /** Also mounted here (not just ExercisesStack) so "Add exercise" from an active
+   *  workout can push+pop within the same stack instead of crossing tabs. */
+  ExerciseList: { pickForSessionId?: string } | undefined;
 };
 
 export type RootStackScreenProps<T extends keyof RootStackParamList> =

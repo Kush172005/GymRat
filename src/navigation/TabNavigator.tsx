@@ -17,7 +17,7 @@ import {
 
 import { HomeScreen } from '../screens/home/HomeScreen';
 import { StepTrackerScreen } from '../screens/activity/StepTrackerScreen';
-import { ExerciseListScreen } from '../screens/exercises/ExerciseListScreen';
+import { ExerciseListScreen } from '../screens/exercises/ExerciseListScreen'; // also mounted in YouStack, see below
 import { ExerciseDetailScreen } from '../screens/exercises/ExerciseDetailScreen';
 import { FavoritesScreen } from '../screens/exercises/FavoritesScreen';
 import { NutritionScreen } from '../screens/fuel/NutritionScreen';
@@ -27,6 +27,9 @@ import { SettingsScreen } from '../screens/you/SettingsScreen';
 import { CreateCustomExerciseScreen } from '../screens/you/CreateCustomExerciseScreen';
 import { PlanScreen } from '../screens/you/PlanScreen';
 import { ProfileSetupScreen } from '../screens/you/ProfileSetupScreen';
+import { ActiveWorkoutScreen } from '../screens/workout/ActiveWorkoutScreen';
+import { WorkoutSummaryScreen } from '../screens/workout/WorkoutSummaryScreen';
+import { WorkoutHistoryScreen } from '../screens/workout/WorkoutHistoryScreen';
 
 const Tab = createBottomTabNavigator<TabParamList>();
 const HomeStack = createNativeStackNavigator<HomeStackParamList>();
@@ -72,6 +75,10 @@ function YouNavigator() {
       <YouStack.Screen name="Plan" component={PlanScreen} />
       <YouStack.Screen name="ProfileSetup" component={ProfileSetupScreen} />
       <YouStack.Screen name="Steps" component={StepTrackerScreen} />
+      <YouStack.Screen name="ActiveWorkout" component={ActiveWorkoutScreen} />
+      <YouStack.Screen name="WorkoutSummary" component={WorkoutSummaryScreen} />
+      <YouStack.Screen name="WorkoutHistory" component={WorkoutHistoryScreen} />
+      <YouStack.Screen name="ExerciseList" component={ExerciseListScreen} />
     </YouStack.Navigator>
   );
 }

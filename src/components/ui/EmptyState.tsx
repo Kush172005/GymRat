@@ -56,5 +56,5 @@ const styles = StyleSheet.create({
   },
   title: { textAlign: 'center', marginBottom: spacing.sm },
   sub:   { textAlign: 'center', lineHeight: 22 },
-  btn:   { marginTop: spacing.xl },
+  btn:   { marginTop: spacing.xl, alignSelf: 'center' },
 });

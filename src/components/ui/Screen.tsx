@@ -38,7 +38,7 @@ export function Screen({
   const inner = scroll ? (
     <ScrollView
       contentContainerStyle={[
-        { padding, paddingBottom: (bottomInset ? insets.bottom : 0) + padding + 24 },
+        { padding, paddingTop: 0, paddingBottom: (bottomInset ? insets.bottom : 0) + padding + 24 },
         contentContainerStyle,
       ]}
       showsVerticalScrollIndicator={false}
@@ -53,7 +53,7 @@ export function Screen({
   return (
     <SafeAreaView
       style={[styles.root, { backgroundColor: colors.background }, !scroll && style]}
-      edges={['top', 'left', 'right']}
+      edges={['left', 'right']}
     >
       <StatusBar style={isDark ? 'light' : 'dark'} />
       {keyboardAvoiding ? (

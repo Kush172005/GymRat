@@ -34,6 +34,8 @@ export function CreateCustomExerciseScreen() {
   const [name, setName] = useState('');
   const [bodyPart, setBodyPart] = useState('');
   const [equipment, setEquipment] = useState('Bodyweight');
+  const [description, setDescription] = useState('');
+  const [tips, setTips] = useState('');
   const [saving, setSaving] = useState(false);
 
   const save = () => {
@@ -47,7 +49,7 @@ export function CreateCustomExerciseScreen() {
       return;
     }
     setSaving(true);
-    customExerciseRepo.create(trimmed, bodyPart, equipment);
+    customExerciseRepo.create(trimmed, bodyPart, equipment, description.trim(), tips.trim());
     setSaving(false);
     nav.goBack();
   };
@@ -102,6 +104,34 @@ export function CreateCustomExerciseScreen() {
           ))}
         </View>
 
+        <AppText variant="label" color="muted" style={styles.fieldLabel}>
+          How to Do It <AppText variant="caption" color="muted">(optional)</AppText>
+        </AppText>
+        <TextInput
+          value={description}
+          onChangeText={setDescription}
+          placeholder="e.g. 1. Set up... 2. Lower under control... 3. Drive back up..."
+          placeholderTextColor={colors.textMuted}
+          style={[styles.input, styles.multiline, { color: colors.text, backgroundColor: colors.surface, borderColor: colors.border }]}
+          accessibilityLabel="How to do it"
+          multiline
+          textAlignVertical="top"
+        />
+
+        <AppText variant="label" color="muted" style={styles.fieldLabel}>
+          Tips <AppText variant="caption" color="muted">(optional)</AppText>
+        </AppText>
+        <TextInput
+          value={tips}
+          onChangeText={setTips}
+          placeholder="Cues and mistakes to avoid"
+          placeholderTextColor={colors.textMuted}
+          style={[styles.input, styles.multiline, { color: colors.text, backgroundColor: colors.surface, borderColor: colors.border }]}
+          accessibilityLabel="Tips"
+          multiline
+          textAlignVertical="top"
+        />
+
         <Button
           title="Save Exercise"
           onPress={save}
@@ -129,6 +159,9 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     fontSize: fontSize.md,
     fontFamily: fontFamily.body.regular,
+  },
+  multiline: {
+    minHeight: 90,
   },
   chips: {
     flexDirection: 'row',

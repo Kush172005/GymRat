@@ -31,6 +31,7 @@ import { RootStackParamList, YouStackParamList } from '../../navigation/types';
 type Nav = NativeStackNavigationProp<RootStackParamList & YouStackParamList>;
 
 const empty: UserProfile = {
+  name: '',
   sex: 'male',
   age: 25,
   heightCm: 175,
@@ -96,6 +97,18 @@ export function ProfileSetupScreen({ navigation }: { navigation: Nav }) {
         <ScrollView contentContainerStyle={styles.pad} keyboardShouldPersistTaps="handled">
           {step === 0 && (
             <>
+              <AppText variant="label" color="muted">Your name</AppText>
+              <TextInput
+                value={p.name ?? ''}
+                onChangeText={(t) => setP({ ...p, name: t })}
+                placeholder="e.g. Kush"
+                placeholderTextColor={colors.textMuted}
+                style={[styles.input, { color: colors.text, backgroundColor: colors.surface, borderColor: colors.border, marginTop: spacing.sm, marginBottom: spacing.xl }]}
+                accessibilityLabel="Your name"
+                returnKeyType="next"
+                maxLength={40}
+              />
+
               <AppText variant="title3">What are you training for?</AppText>
               <AppText variant="body" color="sub" style={styles.lead}>
                 Targets (calories, protein, steps, and a plan) are calculated from this — not guessed.

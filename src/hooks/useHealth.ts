@@ -27,9 +27,12 @@ export function useHealth() {
     if (s === 'granted') {
       const snap = await readHealth();
       setSnapshot(snap);
-      if (snap.source === 'phone_sensor' && Platform.OS === 'android') {
+      // On Android, Health Connect only has step data if some other app (Google Fit,
+      // Samsung Health...) writes into it — keep the phone's own sensor running too so
+      // steps keep updating live even when Health Connect itself has nothing recorded.
+      if (snap.source === 'phone_sensor' || (Platform.OS === 'android' && snap.source === 'health_connect')) {
         startPedometerWatch((n) => {
-          setSnapshot((prev) => ({ ...prev, steps: n }));
+          setSnapshot((prev) => (n > prev.steps ? { ...prev, steps: n } : prev));
         });
       } else {
         stopPedometerWatch();

@@ -1,8 +1,6 @@
 import { Exercise } from '../navigation/types';
 import { customExerciseRepo } from '../db/customExerciseRepo';
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { EXERCISE_DATA } = require('../../data/Excercises') as { EXERCISE_DATA: Exercise[] };
+import { EXERCISE_DATA } from './exercisesData';
 
 export const MUSCLE_GROUPS = [
   'All',
@@ -26,8 +24,8 @@ export function getAllExercises(): Exercise[] {
       bodyPart: ce.body_part,
       equipment: ce.equipment,
       image: null,
-      description: '',
-      beginnerTips: '',
+      description: ce.description,
+      beginnerTips: ce.beginner_tips,
       isCustom: true,
     }),
   );

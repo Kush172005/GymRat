@@ -50,12 +50,15 @@ export const workoutRepo = {
     return { id, started_at: now, finished_at: null, duration_seconds: null, notes: null };
   },
 
-  startFromPlan(exercises: { exerciseId: string; name: string; sets: number }[]): WorkoutSession {
+  /**
+   * Starts a session pre-filled with a plan's exercise checklist. Each exercise starts
+   * unlogged — the user just fills in the weight/reps they actually hit for each one
+   * (see logSet), instead of pre-creating empty sets to fill in one by one.
+   */
+  startFromPlan(exercises: { exerciseId: string; name: string }[]): WorkoutSession {
     const session = this.createSession();
     exercises.forEach((ex, i) => {
-      const we = this.addExercise(session.id, ex.exerciseId, ex.name, i);
-      const setCount = Math.max(1, ex.sets);
-      for (let s = 0; s < setCount; s++) this.addSet(we.id, 0, 0);
+      this.addExercise(session.id, ex.exerciseId, ex.name, i);
     });
     return session;
   },
@@ -206,15 +209,32 @@ export const workoutRepo = {
     return next === 1;
   },
 
-  removeSet(id: string): void {
-    getDb().runSync('DELETE FROM sets WHERE id = ?', [id]);
-  },
-
-  getSetsForExercise(weId: string): WorkoutSet[] {
-    return getDb().getAllSync<WorkoutSet>(
-      'SELECT * FROM sets WHERE workout_exercise_id = ? ORDER BY rowid',
-      [weId],
-    );
+  /**
+   * Simplified logger: one exercise = one best-effort weight × reps entry for the day,
+   * always marked done the moment it's logged (there's no partial/incomplete state).
+   * Pass the exercise's current set id (if it already has one) to update it in place;
+   * omit it to create the exercise's first entry.
+   */
+  logSet(workoutExerciseId: string, weightKg: number, reps: number, existingSetId?: string): WorkoutSet {
+    if (existingSetId) {
+      this.updateSet(existingSetId, weightKg, reps);
+      const db = getDb();
+      db.runSync(
+        'UPDATE sets SET completed = 1, completed_at = COALESCE(completed_at, ?) WHERE id = ?',
+        [Date.now(), existingSetId],
+      );
+      return {
+        id: existingSetId,
+        workout_exercise_id: workoutExerciseId,
+        weight_kg: weightKg,
+        reps,
+        completed: 1,
+        completed_at: Date.now(),
+      };
+    }
+    const set = this.addSet(workoutExerciseId, weightKg, reps);
+    this.toggleSetComplete(set.id);
+    return { ...set, completed: 1 };
   },
 
   // PRs & last weights ───────────────────────────────────────────────────────
@@ -347,25 +367,6 @@ export const workoutRepo = {
     };
   },
 
-  /** Sets from the most recent finished session containing this exercise */
-  getLastSets(exerciseId: string): WorkoutSet[] {
-    const db = getDb();
-    const we = db.getFirstSync<{ id: string }>(
-      `SELECT we.id
-       FROM workout_exercises we
-       JOIN workout_sessions ws ON we.session_id = ws.id
-       WHERE we.exercise_id = ? AND ws.finished_at IS NOT NULL
-       ORDER BY ws.finished_at DESC
-       LIMIT 1`,
-      [exerciseId],
-    );
-    if (!we) return [];
-    return db.getAllSync<WorkoutSet>(
-      'SELECT * FROM sets WHERE workout_exercise_id = ? AND completed = 1 ORDER BY rowid',
-      [we.id],
-    );
-  },
-
   // Export / clear ───────────────────────────────────────────────────────────
 
   getAllForExport() {
@@ -378,8 +379,9 @@ export const workoutRepo = {
   },
 
   /**
-   * Creates a new session pre-filled with the last session's exercises.
-   * Each exercise gets its previous sets (same weight & reps) as default values.
+   * Creates a new session pre-filled with the last session's exercise checklist, each
+   * one seeded with the weight × reps it was logged at last time — so repeating a
+   * workout starts with yesterday's numbers ready to beat instead of a blank slate.
    * Returns null if there is no previous session.
    */
   repeatLastWorkout(): WorkoutSession | null {
@@ -388,20 +390,14 @@ export const workoutRepo = {
 
     const newSession = this.createSession();
     for (const ex of last.exercises) {
-      const we = this.addExercise(
-        newSession.id,
-        ex.exercise_id,
-        ex.exercise_name,
-        ex.order_index,
-      );
-      const prevSets = ex.sets.filter((s) => s.completed);
-      if (prevSets.length > 0) {
-        for (const s of prevSets) {
-          this.addSet(we.id, s.weight_kg, s.reps);
-        }
-      } else {
-        this.addSet(we.id, 0, 0);
-      }
+      const we = this.addExercise(newSession.id, ex.exercise_id, ex.exercise_name, ex.order_index);
+      const best = ex.sets
+        .filter((s) => s.completed === 1)
+        .reduce<WorkoutSet | null>(
+          (a, b) => (!a || b.weight_kg > a.weight_kg || (b.weight_kg === a.weight_kg && b.reps > a.reps) ? b : a),
+          null,
+        );
+      if (best) this.logSet(we.id, best.weight_kg, best.reps);
     }
     return newSession;
   },

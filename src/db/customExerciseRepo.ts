@@ -6,6 +6,8 @@ export interface CustomExercise {
   name: string;
   body_part: string;
   equipment: string;
+  description: string;
+  beginner_tips: string;
   created_at: number;
 }
 
@@ -17,15 +19,30 @@ export const customExerciseRepo = {
     );
   },
 
-  create(name: string, bodyPart: string, equipment: string): CustomExercise {
+  create(
+    name: string,
+    bodyPart: string,
+    equipment: string,
+    description = '',
+    beginnerTips = '',
+  ): CustomExercise {
     const db = getDb();
     const id = `custom_${generateId()}`;
     const now = Date.now();
     db.runSync(
-      'INSERT INTO custom_exercises (id, name, body_part, equipment, created_at) VALUES (?, ?, ?, ?, ?)',
-      [id, name, bodyPart, equipment, now],
+      `INSERT INTO custom_exercises (id, name, body_part, equipment, description, beginner_tips, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [id, name, bodyPart, equipment, description, beginnerTips, now],
     );
-    return { id, name, body_part: bodyPart, equipment, created_at: now };
+    return {
+      id,
+      name,
+      body_part: bodyPart,
+      equipment,
+      description,
+      beginner_tips: beginnerTips,
+      created_at: now,
+    };
   },
 
   delete(id: string): void {
