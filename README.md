@@ -4,12 +4,12 @@
 
 # GymRat
 
-**A local-first fitness companion built with React Native, Expo, and TypeScript.**
+**A local-first fitness companion built with React Native, Expo, and JavaScript.**
 Workout logging with automatic PR tracking, real step/health data from Apple Health & Health Connect with a three-tier fallback chain, and a nutrition engine built on the Mifflin–St Jeor equation and ISSN protein research — all stored on-device with zero backend.
 
 [![React Native](https://img.shields.io/badge/React_Native-0.86-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://reactnative.dev)
 [![Expo](https://img.shields.io/badge/Expo_SDK-57-000020?style=for-the-badge&logo=expo&logoColor=white)](https://expo.dev)
-[![TypeScript](https://img.shields.io/badge/TypeScript-Strict-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![JavaScript](https://img.shields.io/badge/JavaScript-ES2022-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](https://developer.mozilla.org/docs/Web/JavaScript)
 [![SQLite](https://img.shields.io/badge/SQLite-On--Device-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://www.sqlite.org)
 [![Platform](https://img.shields.io/badge/Platform-iOS%20%7C%20Android-8A2BE2?style=for-the-badge)](#-getting-started)
 
@@ -74,7 +74,7 @@ The app is organized around four tabs — **Home**, **Exercises**, **Fuel**, and
 
 | Layer | Technology | Why |
 |---|---|---|
-| **Framework** | React Native 0.86 · Expo SDK 57 · TypeScript (strict mode) | Managed workflow with config plugins for the two native health SDKs, without ejecting |
+| **Framework** | React Native 0.86 · Expo SDK 57 · JavaScript (ES modules) | Managed workflow with config plugins for the two native health SDKs, without ejecting |
 | **Navigation** | React Navigation 7 — one root stack gating onboarding, four bottom tabs, each with its own native stack | Deep, typed navigation graphs with cross-stack screen reuse (see [Architecture](#architecture)) |
 | **Local persistence** | `expo-sqlite` (WAL journal mode, foreign keys on) | Real relational storage on-device — no AsyncStorage key/value hacks, no backend |
 | **Health integration** | `react-native-health-connect` (Android) · `@kingstinct/react-native-healthkit` (iOS) · `expo-sensors` `Pedometer` (universal fallback) | A `HealthProvider` interface abstracts all three behind one contract |
@@ -90,7 +90,7 @@ The app is organized around four tabs — **Home**, **Exercises**, **Fuel**, and
 
 ### 1. Workout Logger with Automatic PR Tracking
 
-**Files:** [`src/db/workoutRepo.ts`](src/db/workoutRepo.ts) · [`src/screens/workout/ActiveWorkoutScreen.tsx`](src/screens/workout/ActiveWorkoutScreen.tsx) · [`WorkoutSummaryScreen.tsx`](src/screens/workout/WorkoutSummaryScreen.tsx) · [`WorkoutHistoryScreen.tsx`](src/screens/workout/WorkoutHistoryScreen.tsx)
+**Files:** [`src/db/workoutRepo.js`](src/db/workoutRepo.js) · [`src/screens/workout/ActiveWorkoutScreen.js`](src/screens/workout/ActiveWorkoutScreen.js) · [`WorkoutSummaryScreen.js`](src/screens/workout/WorkoutSummaryScreen.js) · [`WorkoutHistoryScreen.js`](src/screens/workout/WorkoutHistoryScreen.js)
 
 Most workout loggers model a session as sets-within-exercises-within-workouts and ask for weight and reps on every single set. GymRat deliberately doesn't: **each exercise gets exactly one entry per session — your best effort for that movement today.** That's a product decision, not a limitation: the schema (`workout_sessions → workout_exercises → sets`) still supports multiple sets per exercise, but the UI and the `logSet()` upsert method treat it as one slot, because the friction of a full set-by-set form is what makes people stop logging.
 
@@ -103,33 +103,33 @@ Most workout loggers model a session as sets-within-exercises-within-workouts an
 
 ### 2. Exercise Library (97 exercises)
 
-**Files:** [`src/data/exercisesData.ts`](src/data/exercisesData.ts) · [`src/data/exercises.ts`](src/data/exercises.ts) · [`src/components/ExerciseCard.tsx`](src/components/ExerciseCard.tsx) · [`src/screens/exercises/`](src/screens/exercises)
+**Files:** [`src/data/exercisesData.js`](src/data/exercisesData.js) · [`src/data/exercises.js`](src/data/exercises.js) · [`src/components/ExerciseCard.js`](src/components/ExerciseCard.js) · [`src/screens/exercises/`](src/screens/exercises)
 
 37 exercises ship with bundled local images and a curated demo video; the other 60 (added to properly cover shoulders, arms, posterior chain, and conditioning) use **YouTube's own public thumbnail CDN** (`img.youtube.com/vi/<id>/hqdefault.jpg`) as their card image, paired with a link to the exact video that thumbnail belongs to. Every one of those 60 links was individually verified to exist and match the exercise before being added — for something safety-relevant like lifting form, a wrong or dead video is worse than no video.
 
 - **Search + muscle-group filtering** (`filterExercises()`) handles compound body parts (e.g. `"Back, Legs"` for a deadlift) by splitting on comma, so an exercise can surface under more than one filter chip.
-- **Custom exercises** (`src/db/customExerciseRepo.ts`) are stored in their own table with optional user-written instructions/tips, then merged transparently into the same list via `getAllExercises()` — the rest of the app (search, favorites, the workout logger's exercise picker) never has to know whether an exercise is bundled or user-created.
+- **Custom exercises** (`src/db/customExerciseRepo.js`) are stored in their own table with optional user-written instructions/tips, then merged transparently into the same list via `getAllExercises()` — the rest of the app (search, favorites, the workout logger's exercise picker) never has to know whether an exercise is bundled or user-created.
 - **Favorites are stored as a JSON snapshot**, not a foreign key (`favoritesRepo.add()` serializes the whole `Exercise` object into a `data` column). That's deliberate: a favorited custom exercise still renders correctly even if the user later edits or deletes the original custom-exercise row.
 
 ### 3. Health & Activity Tracking
 
-**Files:** [`src/health/`](src/health) (`types.ts`, `client.ts`, `androidHealthConnect.ts`, `iosHealthKit.ts`, `pedometer.ts`, `env.ts`) · [`src/hooks/useHealth.ts`](src/hooks/useHealth.ts) · [`src/screens/activity/StepTrackerScreen.tsx`](src/screens/activity/StepTrackerScreen.tsx)
+**Files:** [`src/health/`](src/health) (`types.js`, `client.js`, `androidHealthConnect.js`, `iosHealthKit.js`, `pedometer.js`, `env.js`) · [`src/hooks/useHealth.js`](src/hooks/useHealth.js) · [`src/screens/activity/StepTrackerScreen.js`](src/screens/activity/StepTrackerScreen.js)
 
 This is the most architecturally involved part of the app: two unrelated native health SDKs, one shared UI, and a client that has to behave correctly whether it's running in Expo Go, a dev client, or a production build.
 
 ```mermaid
 flowchart TD
-    UI["StepTrackerScreen / useHealth()"] --> Client["health/client.ts"]
+    UI["StepTrackerScreen / useHealth()"] --> Client["health/client.js"]
     Client -->|"Expo Go?"| Fallback["pedometerProvider\n(expo-sensors, universal)"]
-    Client -->|"Android, native build"| HC["androidHealthConnect.ts\n(react-native-health-connect)"]
-    Client -->|"iOS, native build"| HK["iosHealthKit.ts\n(@kingstinct/react-native-healthkit)"]
+    Client -->|"Android, native build"| HC["androidHealthConnect.js\n(react-native-health-connect)"]
+    Client -->|"iOS, native build"| HK["iosHealthKit.js\n(@kingstinct/react-native-healthkit)"]
     HC -->|"steps == 0?"| Merge["max(HealthConnect, phone sensor)"]
     Fallback --> Merge
     Merge --> SQLite[("daily_steps / health_daily\ntables")]
     HK --> SQLite
 ```
 
-- **One interface, three implementations.** `HealthProvider` (`getStatus`, `request`, `readToday`, optional `openSettings`) is implemented independently by `androidHealthConnect`, `iosHealthKit`, and `pedometerProvider`. `health/client.ts` picks the right one at runtime and everything above it (the hook, the screen) is written against the interface, never the implementation.
+- **One interface, three implementations.** `HealthProvider` (`getStatus`, `request`, `readToday`, optional `openSettings`) is implemented independently by `androidHealthConnect`, `iosHealthKit`, and `pedometerProvider`. `health/client.js` picks the right one at runtime and everything above it (the hook, the screen) is written against the interface, never the implementation.
 - **Native modules are loaded lazily and defensively.** `loadNative()` checks `isExpoGo()` (via `Constants.executionEnvironment`/`appOwnership`) before ever `import()`-ing the platform module — Health Connect and HealthKit are compiled native code that simply isn't present in the generic Expo Go binary, so attempting to load them there would crash the app. In Expo Go, the client transparently falls back to `expo-sensors`' `Pedometer`, which *is* available everywhere.
 - **A full permission state machine**, not a boolean: `checking | granted | denied | undetermined | unavailable | needs_install`. The UI (`PermissionState` component, `StepTrackerScreen`) renders distinct, actionable copy for each state and for each runtime context — the message telling an Expo Go user to run `npx expo run:android` is different from the message telling a dev-client user their Health Connect permission is denied.
 - **Android steps come from two sources, merged.** Health Connect is a passive data broker — it only has step data if some *other* app (Google Fit, Samsung Health, a tracker) is actively writing into it. Many phones have nothing doing that, which silently produces a correct-but-useless zero. GymRat also keeps `Pedometer.watchStepCount` running in the background regardless of which provider is "primary," accumulates its deltas into the `daily_steps` table, and takes `max(healthConnectSteps, phoneSensorSteps)` — so the step count is never stuck at zero just because Health Connect itself is empty.
@@ -138,7 +138,7 @@ flowchart TD
 
 ### 4. Evidence-Based Nutrition Engine
 
-**Files:** [`src/domain/nutrition.ts`](src/domain/nutrition.ts) · [`src/screens/fuel/NutritionScreen.tsx`](src/screens/fuel/NutritionScreen.tsx) · [`FoodPickerScreen.tsx`](src/screens/fuel/FoodPickerScreen.tsx) · [`src/data/foods.ts`](src/data/foods.ts)
+**Files:** [`src/domain/nutrition.js`](src/domain/nutrition.js) · [`src/screens/fuel/NutritionScreen.js`](src/screens/fuel/NutritionScreen.js) · [`FoodPickerScreen.js`](src/screens/fuel/FoodPickerScreen.js) · [`src/data/foods.js`](src/data/foods.js)
 
 `computeTargets(profile)` is pure, dependency-free, and fully unit-testable in isolation — every number it returns traces to a cited method:
 
@@ -149,29 +149,29 @@ flowchart TD
 - **Fat** floors at 0.7 g/kg or 25% of calories, whichever is higher; **carbs** absorb whatever calories are left; **fiber** follows the IOM's 14 g per 1000 kcal; **water** is 35 ml/kg; **per-meal protein** divides the daily target across 3–6 user-set meals.
 - **Step goal** also derives from the selected goal (10,000 for fat loss, 12,000 for endurance goals, 8,000 default) and feeds directly into the Activity screen's progress ring.
 
-The **104-item food database** (`src/data/foods.ts`) spans 7 categories (protein/carb/fat/veg/fruit/dairy/snack) with realistic macros for both Western staples and Indian staples (dal, roti, poha, idli, paneer dishes) — deliberately not just "clean bodybuilding foods," so logging actually matches what people eat. `FoodPickerScreen` adds a half-serving stepper (0.5 increments) so a real portion doesn't have to round to a whole serving.
+The **104-item food database** (`src/data/foods.js`) spans 7 categories (protein/carb/fat/veg/fruit/dairy/snack) with realistic macros for both Western staples and Indian staples (dal, roti, poha, idli, paneer dishes) — deliberately not just "clean bodybuilding foods," so logging actually matches what people eat. `FoodPickerScreen` adds a half-serving stepper (0.5 increments) so a real portion doesn't have to round to a whole serving.
 
 ### 5. Adaptive Training Plans
 
-**Files:** [`src/domain/plans.ts`](src/domain/plans.ts) · [`src/screens/you/PlanScreen.tsx`](src/screens/you/PlanScreen.tsx)
+**Files:** [`src/domain/plans.js`](src/domain/plans.js) · [`src/screens/you/PlanScreen.js`](src/screens/you/PlanScreen.js)
 
 `planForGoal(goal, daysPerWeek, experience)` selects from six plan archetypes — Full Body (A/B/C rotation), Push/Pull/Legs, a linear 5×5 strength progression, and a lift/easy-run hybrid — built entirely from exercises already in the library. A day-of-week lookup table (`TRAINING_DOWS`) maps a chosen weekly frequency (2–7 days) to actual weekdays, and `todaysPlanDay()` resolves what "today" means against that schedule, including correctly reporting a rest day. Tapping **Start Workout** on the Plan screen calls `workoutRepo.startFromPlan()`, which pre-populates a new session with that day's exercise checklist — one tap from "here's your plan" to "logging."
 
 ### 6. Onboarding & Personalization
 
-**Files:** [`src/screens/onboarding/OnboardingScreen.tsx`](src/screens/onboarding/OnboardingScreen.tsx) · [`src/screens/you/ProfileSetupScreen.tsx`](src/screens/you/ProfileSetupScreen.tsx) · [`src/navigation/RootNavigator.tsx`](src/navigation/RootNavigator.tsx)
+**Files:** [`src/screens/onboarding/OnboardingScreen.js`](src/screens/onboarding/OnboardingScreen.js) · [`src/screens/you/ProfileSetupScreen.js`](src/screens/you/ProfileSetupScreen.js) · [`src/navigation/RootNavigator.js`](src/navigation/RootNavigator.js)
 
-`RootNavigator` reads `settingsRepo.isOnboardingDone()` **synchronously** (SQLite is initialized before the first render — see [`App.tsx`](App.tsx)) to pick the stack's `initialRouteName`, so there's no flash of the wrong screen on a cold start. A 3-slide carousel leads into a 4-step profile wizard (name → goal → body stats → lifestyle) that ends on a live-computed targets preview: every keystroke re-runs `computeTargets()` against a `hydrate()`-merged draft profile via `useMemo`, so the calorie/protein numbers update in real time as you type, before you've even saved. The name collected here threads through to the Home screen's greeting and the workout-complete screen's headline.
+`RootNavigator` reads `settingsRepo.isOnboardingDone()` **synchronously** (SQLite is initialized before the first render — see [`App.js`](App.js)) to pick the stack's `initialRouteName`, so there's no flash of the wrong screen on a cold start. A 3-slide carousel leads into a 4-step profile wizard (name → goal → body stats → lifestyle) that ends on a live-computed targets preview: every keystroke re-runs `computeTargets()` against a `hydrate()`-merged draft profile via `useMemo`, so the calorie/protein numbers update in real time as you type, before you've even saved. The name collected here threads through to the Home screen's greeting and the workout-complete screen's headline.
 
 ### 7. Design System
 
 **Files:** [`src/theme/`](src/theme) · [`src/components/ui/`](src/components/ui)
 
-A token-based system — `colors.ts` (separate light/dark palettes sharing one ember/copper accent), `spacing.ts`, `typography.ts` (Oswald for display, DM Sans for body) — driven through a `ThemeContext` that follows the OS appearance by default and persists a manual override to SQLite. A dozen primitives (`Screen`, `AppHeader`, `Card`, `Button`, `Chip`, `AppText`, `EmptyState`, `ErrorState`, `PermissionState`, `LoadingState`) are the *only* styling surface every screen touches, which is what keeps ~30 screens visually consistent without a component library dependency.
+A token-based system — `colors.js` (separate light/dark palettes sharing one ember/copper accent), `spacing.js`, `typography.js` (Oswald for display, DM Sans for body) — driven through a `ThemeContext` that follows the OS appearance by default and persists a manual override to SQLite. Nine primitives (`Screen`, `AppHeader`, `Card`, `Button`, `Chip`, `AppText`, `EmptyState`, `ErrorState`, `PermissionState`) are the *only* styling surface every screen touches, which is what keeps ~30 screens visually consistent without a component library dependency.
 
 ### 8. Local-First Data Layer
 
-**Files:** [`src/db/client.ts`](src/db/client.ts) + one repository per table
+**Files:** [`src/db/client.js`](src/db/client.js) + one repository per table
 
 `initDatabase()` opens `expo-sqlite` in WAL journal mode with foreign keys enabled and creates ten tables (`settings`, `favorites`, `custom_exercises`, `workout_sessions`, `workout_exercises`, `sets`, `daily_steps`, `food_logs`, `water_logs`, `health_daily`) synchronously before the app's first render. Every table has exactly one repository module (`workoutRepo`, `nutritionRepo`, `stepsRepo`, `profileRepo`, `settingsRepo`, `favoritesRepo`, `customExerciseRepo`, `healthRepo`) that owns all of its SQL — no screen ever writes a raw query. All of it runs through `expo-sqlite`'s **synchronous** API (`getFirstSync` / `getAllSync` / `runSync`), which is what makes patterns like reading `settingsRepo.isOnboardingDone()` before the first paint possible. `SettingsScreen` also exposes a full JSON export of every table via `expo-file-system` + `expo-sharing`, and a two-step-confirmed "delete everything" that wipes user data while deliberately preserving theme/units/onboarding state.
 
@@ -187,9 +187,9 @@ flowchart LR
     end
     subgraph Domain ["Domain logic (src/domain/**, src/health/**)"]
         direction TB
-        Nutrition["nutrition.ts\n(pure functions)"]
-        Plans["plans.ts\n(pure functions)"]
-        HealthClient["health/client.ts\n(provider abstraction)"]
+        Nutrition["nutrition.js\n(pure functions)"]
+        Plans["plans.js\n(pure functions)"]
+        HealthClient["health/client.js\n(provider abstraction)"]
     end
     subgraph Data ["Data layer (src/db/**)"]
         direction TB
@@ -206,9 +206,9 @@ flowchart LR
     Native --> Repos
 ```
 
-- **Navigation** is a root native-stack (`Onboarding → ProfileSetup → Main`) wrapping a bottom-tab navigator, where each of the four tabs owns its own nested native-stack. A few screens are deliberately mounted in **more than one** stack — `ProfileSetupScreen` in three, `ExerciseListScreen` in two — so that a flow like "add an exercise to today's workout" pushes and pops within the *same* stack the workout logger lives in, instead of a cross-tab jump that would leave the back button in a confusing state. Making that work with full type safety meant typing those screens' navigation prop against an **intersection** of the relevant `ParamList` types (`NativeStackNavigationProp<ExercisesStackParamList & YouStackParamList>`) rather than the single-stack helper types React Navigation generates by default.
+- **Navigation** is a root native-stack (`Onboarding → ProfileSetup → Main`) wrapping a bottom-tab navigator, where each of the four tabs owns its own nested native-stack. A few screens are deliberately mounted in **more than one** stack — `ProfileSetupScreen` in three, `ExerciseListScreen` in two — so that a flow like "add an exercise to today's workout" pushes and pops within the *same* stack the workout logger lives in, instead of a cross-tab jump that would leave the back button in a confusing state.
 - **State management is intentionally not Redux/MobX/Zustand.** Screens hold local `useState`, refetch from SQLite on `useFocusEffect`, and treat the database itself as the single source of truth — there's no client-side cache to invalidate because there's nothing to keep in sync with a server. For a CRUD-heavy, offline-only app, that's less machinery than a global store would add, not more.
-- **TypeScript is strict end-to-end** — every navigation param list is fully typed, every repo returns typed rows matching hand-written interfaces that mirror the SQL schema, and `npx tsc --noEmit` is the project's actual gate (there's no separate test runner yet — see [Roadmap](#-roadmap)).
+- **Plain JavaScript, consistent module boundaries.** Every screen, repo, and provider follows the same shape (a plain object or function export, no classes outside `ErrorBoundary`), so the contract between layers is enforced by convention and small, readable functions rather than a type checker (there's no separate test runner yet — see [Roadmap](#-roadmap)).
 
 ## Data Flow Walkthroughs
 
@@ -216,13 +216,13 @@ flowchart LR
 `ActiveWorkoutScreen` renders one `ExerciseLogRow` per exercise in the session → typing in the weight/reps fields updates local component state only (no DB write per keystroke) → on blur (`onEndEditing`), `commit()` parses the input through `parseWeightInput()` (which also handles kg/lb conversion based on `settingsRepo.getUnits()`) and calls `workoutRepo.logSet(workoutExerciseId, weightKg, reps, existingSetId?)` → `logSet` either updates the exercise's existing set or inserts its first one and immediately marks it `completed = 1` → the screen calls `getFullSession()` again to refresh, and `getPR()` re-runs to decide whether the row should show its "New PR!" state.
 
 **Reading today's steps on Android, end to end:**
-`useHealth()`'s `sync()` calls `getHealthStatus()` → `health/client.ts` lazy-loads `androidHealthConnect` (skipped entirely in Expo Go) → if Health Connect reports `granted`, `readHealth()` calls its `readToday()`, which runs Health Connect aggregate queries for steps/calories/distance/heart-rate/elevation and a `readRecords` query for sleep sessions → separately, `stepsRepo.getTodaySteps()` is checked against whatever the phone's own `Pedometer.watchStepCount` listener has accumulated → whichever step count is higher wins → the merged snapshot is persisted back into `daily_steps`/`health_daily` and rendered by `StepTrackerScreen`.
+`useHealth()`'s `sync()` calls `getHealthStatus()` → `health/client.js` lazy-loads `androidHealthConnect` (skipped entirely in Expo Go) → if Health Connect reports `granted`, `readHealth()` calls its `readToday()`, which runs Health Connect aggregate queries for steps/calories/distance/heart-rate/elevation and a `readRecords` query for sleep sessions → separately, `stepsRepo.getTodaySteps()` is checked against whatever the phone's own `Pedometer.watchStepCount` listener has accumulated → whichever step count is higher wins → the merged snapshot is persisted back into `daily_steps`/`health_daily` and rendered by `StepTrackerScreen`.
 
 ## Folder Structure
 
 ```text
 GymRat/
-├── App.tsx                       # Entry point — DB init, font loading, theme, nav root
+├── App.js                        # Entry point — DB init, font loading, theme, nav root
 ├── app.json                      # Expo config: permissions, plugins, bundle identifiers
 ├── eas.json                      # EAS Build profiles (development / preview / production)
 ├── plugins/
@@ -237,13 +237,13 @@ GymRat/
     │   ├── workout/              # Active logger, summary, history/PRs
     │   ├── activity/             # Steps & health dashboard
     │   └── onboarding/
-    ├── navigation/                # Root stack, bottom tabs, per-tab stacks, param types
+    ├── navigation/                # Root stack, bottom tabs, per-tab stacks
     ├── components/ui/             # Screen, AppHeader, Card, Button, Chip, EmptyState, ...
     ├── theme/                     # Colors, typography, spacing, ThemeContext
     ├── health/                    # HealthProvider interface + 3 implementations + client
     ├── db/                        # SQLite client + one repository per table
     ├── domain/                    # Pure logic: nutrition targets, training plans, profile
-    ├── data/                      # exercisesData.ts (97 exercises), foods.ts (104 items)
+    ├── data/                      # exercisesData.js (97 exercises), foods.js (104 items)
     ├── hooks/                     # useHealth / useSteps
     └── utils/                     # date, units (kg⇄lb), uuid, permissions helpers
 ```
@@ -289,7 +289,7 @@ A few deliberate tradeoffs, in case they come up:
 
 ## 🗺 Roadmap
 
-- [ ] Automated test suite (unit tests for `domain/nutrition.ts` and `domain/plans.ts` are the natural starting point — both are pure functions today)
+- [ ] Automated test suite (unit tests for `domain/nutrition.js` and `domain/plans.js` are the natural starting point — both are pure functions today)
 - [ ] Wearable integration (Apple Watch, Wear OS)
 - [ ] Body-weight and measurement tracking over time
 - [ ] Barcode scanning for food logging
